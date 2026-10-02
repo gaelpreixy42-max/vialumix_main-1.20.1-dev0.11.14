@@ -23,6 +23,11 @@ public final class VialumixConfig {
     public String dlssQuality = "quality";
     public boolean frameGeneration = false;
 
+    /** Vialumix-owned basic video settings. */
+    public String resolution = "current";
+    public int renderDistance = 12;
+    public String graphicsQuality = "fancy";
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public static VialumixConfig load(Path file) {
