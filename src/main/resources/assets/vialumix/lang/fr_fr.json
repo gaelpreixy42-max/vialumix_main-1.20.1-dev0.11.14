@@ -4,6 +4,18 @@
   "vialumix.video.vialumix": "Graphismes Vialumix",
   "vialumix.button.minecraft": "Graphismes Minecraft / Sodium",
   "vialumix.button.vialumix": "Graphismes Vialumix",
+  "vialumix.graphics.title": "Graphismes",
+  "vialumix.graphics.resolution": "Résolution",
+  "vialumix.graphics.resolution.current": "Résolution actuelle",
+  "vialumix.graphics.resolution.1920x1080": "1920 × 1080",
+  "vialumix.graphics.resolution.2560x1440": "2560 × 1440",
+  "vialumix.graphics.resolution.3840x2160": "3840 × 2160",
+  "vialumix.graphics.resolution.1280x720": "1280 × 720",
+  "vialumix.graphics.render_distance": "Distance de rendu",
+  "vialumix.graphics.quality": "Qualité graphique",
+  "vialumix.graphics.quality.fast": "Rapide",
+  "vialumix.graphics.quality.fancy": "Élevée",
+  "vialumix.graphics.quality.fabulous": "Fabuleuse",
   "vialumix.shaderpack": "Shaderpack",
   "vialumix.ray_tracing": "Ray Tracing",
   "vialumix.rt.shadows": "Ombres Ray Tracing",
@@ -22,8 +34,5 @@
   "vialumix.apply": "Appliquer",
   "vialumix.rt.backend_missing": "Le backend Ray Tracing Vialumix n'est pas encore disponible.",
   "vialumix.dlss.rr_missing": "DLSS Ray Reconstruction est indisponible.",
-  "vialumix.dlss.fg_missing": "DLSS Frame Generation est indisponible.",
-  "vialumix.graphics.title": "Graphismes",
-  "vialumix.graphics.minecraft": "Graphismes Minecraft / Sodium",
-  "vialumix.graphics.vialumix": "Graphismes Vialumix"
+  "vialumix.dlss.fg_missing": "DLSS Frame Generation est indisponible."
 }
