@@ -1,0 +1,10 @@
+^D:\...VIALUMIX DEV\VIALUMIX 1.20.1\VIALUMIX_MAIN-1.20.1-DEV0.11.14\NATIVE\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native" "-BD:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build-x64" --check-stamp-file "D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build-x64/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

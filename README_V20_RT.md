@@ -1,0 +1,1 @@
+Vialumix v20 introduces the first real Vulkan RT device bootstrap. The RT toggle now starts/stops a native Vulkan device instead of merely changing a Java configuration flag. World rendering is still Iris/Sodium until the frame-interception and Minecraft geometry upload phase is implemented.

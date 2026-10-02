@@ -1,0 +1,1075 @@
+============================================================
+VIALUMIX / MCVR DIAGNOSTIC
+Date : 10/02/2026 15:00:45
+Racine : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14
+============================================================
+
+==================== ARBORESCENCE RACINE ====================
+
+Mode   Name                      Length
+----   ----                      ------
+d----- docs                            
+d----- gradle                          
+d----- instance                        
+d----- native                          
+d----- src                             
+d----- tools                           
+d----- .minecraft                      
+d--h-- .git                            
+d----- .gradle                         
+d----- libs                            
+d----- build                           
+d----- mcvr                            
+-a---- build.gradle              1835  
+-a---- gradle.properties         291   
+-a---- gradlew                   8733  
+-a---- gradlew.bat               2937  
+-a---- LICENSE                   148   
+-a---- README.md                 5108  
+-a---- RUN_AFTER_BUILD.bat       509   
+-a---- settings.gradle           502   
+-a---- THIRD_PARTY_NOTICES.md    576   
+-a---- RUN_DEBUG.bat             273   
+-a---- README_BUILD_FIX.txt      457   
+-a---- .gitattributes            66    
+-a---- README_V18_FIXES.txt      855   
+-a---- README_V20_RT.md          293   
+-a---- BUILD_VIALUMIX_NATIVE.bat 53    
+-a---- README_BUILD_FIX_V24.txt  422   
+-a---- README_V26_FIX.txt        555   
+-a---- README_RT_IMPORTANT.txt   919   
+-a---- README_V28_FIX.txt        519   
+-a---- dxc-build.log             942   
+-a---- vialumix_diagnostic.txt   322   
+
+
+
+
+==================== ARBORESCENCE MCVR ====================
+
+Mode   Name             Length
+----   ----             ------
+d--h-- .git                   
+d----- .github                
+d----- cmake                  
+d----- extern                 
+d----- src                    
+d----- build                  
+-a---- .clang-format    2953  
+-a---- .gitignore       1276  
+-a---- .gitmodules      1473  
+-a---- CMakeLists.txt   8096  
+-a---- LICENSE.md       1021  
+-a---- README.md        4260  
+-a---- WindowsTraps.txt 630   
+
+
+
+
+==================== FICHIERS CMAKE / GRADLE / README ====================
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\gradle\wrapper\gradle-wrapper.properties
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build\CMakeFiles\4.4.3\CMakeSystem.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build\CMakeFiles\4.4.3\CMakeRCCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build\CMakeFiles\4.4.3\CMakeCXXCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build-x64\CMakeFiles\4.4.3\CMakeSystem.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build-x64\CMakeFiles\4.4.3\CMakeRCCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build-x64\CMakeFiles\4.4.3\CMakeCXXCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build-x64\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\BUILD_NATIVE.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\tools\BUILD_AND_INSTALL.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\tools\BUILD_AND_INSTALL.ps1
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\.gradle\8.14.1\gc.properties
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\.gradle\buildOutputCleanup\cache.properties
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\.gradle\vcs-1\gc.properties
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\cmake\PrepareSharc.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\DLSS\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\DLSS\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\ffx-api\BuildFfxApiDll.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\ffx-api\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\application\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\AGS\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\AGS\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\acs\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\acs\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\agilitysdk\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\antilag2\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\dxc\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\dxheaders\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\imgui\docs\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\imgui\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\json\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\memoryallocator\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\pix\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\renderdoc\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\stb\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\vectormath\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\vectormath\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\src\render\backend_shader_reloader\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\src\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\rendermodules\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\blur\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\breadcrumbs\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\brixelizergi\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\cacao\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\cas\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\dof\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\fsrapi\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\hybridreflections\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\hybridshadows\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\lens\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\lpm\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\parallelsort\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\spd\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\sssr\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\vrs\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\samples\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\libs\pix\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\backends\dx12\FrameInterpolationSwapchain\recompileUiCompositionHLSL.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\backends\dx12\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\backends\vk\FrameInterpolationSwapchain\recompileUiCompositionGLSL.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\backends\vk\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\blur\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\breadcrumbs\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\brixelizer\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\brixelizergi\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\cacao\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\cas\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\classifier\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\denoiser\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\dof\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\frameinterpolation\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\fsr1\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\fsr2\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\fsr3\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\fsr3upscaler\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\lens\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\lpm\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\opticalflow\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\parallelsort\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\spd\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\sssr\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\src\components\vrs\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\tools\ffx_shader_compiler\libs\SPIRV-Reflect\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\tools\ffx_shader_compiler\libs\agilitysdk\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\tools\ffx_shader_compiler\libs\dxc\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\tools\ffx_shader_compiler\libs\glslangValidator\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\tools\ffx_shader_compiler\libs\tiny-process-library\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\tools\ffx_shader_compiler\libs\tiny-process-library\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\tools\ffx_shader_compiler\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\tools\ffx_shader_compiler\GenerateSolution.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\BuildFidelityFXSDK.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\BuildFidelityFXSDKSolutionDX12.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\BuildFidelityFXSDKSolutionVK.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sdk\toolchain.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\BuildSamplesSolutionDX12.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\BuildSamplesSolutionVK.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\CleanAllGeneratedData.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\ClearMediaCache.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\UpdateMedia.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\common.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\readme.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\sample.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\CMake\modules\FindEpollShim.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\CMake\modules\FindOSMesa.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\CMake\GenerateMappings.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\CMake\i686-w64-mingw32-clang.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\CMake\i686-w64-mingw32.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\CMake\x86_64-w64-mingw32-clang.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\CMake\x86_64-w64-mingw32.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\docs\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\examples\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\src\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\tests\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glfw\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\glm\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\test\bug\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\test\cmake\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\test\core\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\test\ext\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\test\gtc\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\test\gtx\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\test\perf\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\test\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\glm\readme.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\cmake\scripts\gen_bazel_build_file.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\cmake\ci.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\cmake\clang_flags.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\cmake\download_test_data.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\cmake\gcc_flags.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\cmake\test.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\docset\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\mkdocs\docs\integration\cget\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\mkdocs\docs\integration\conan\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\mkdocs\docs\integration\cpm\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\mkdocs\docs\integration\homebrew\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\mkdocs\docs\integration\hunter\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\mkdocs\docs\integration\macports\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\mkdocs\docs\integration\spack\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\mkdocs\docs\integration\vcpkg\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\docs\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\src\modules\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\abi\config\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\abi\diag\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\abi\inline_ns\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\abi\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\benchmarks\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_add_subdirectory\project\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_add_subdirectory\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_fetch_content\project\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_fetch_content\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_fetch_content2\project\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_fetch_content2\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_import\project\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_import\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_import_minver\project\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_import_minver\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_target_include_directories\project\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cmake_target_include_directories\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\cuda_example\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\module_cpp20\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\reports\2016-09-09-nativejson_benchmark\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\thirdparty\Fuzzer\test\no-coverage\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\thirdparty\Fuzzer\test\ubsan\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\thirdparty\Fuzzer\test\uninstrumented\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\thirdparty\Fuzzer\test\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\thirdparty\Fuzzer\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tests\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tools\amalgamate\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tools\gdb_pretty_printer\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tools\generate_natvis\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tools\serve_header\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\cmake\FindZLIB-NG.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\cmake\clone-repo.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\cmake\detect-sanitizer.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\doc\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\test\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\arch\riscv\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\arch\s390\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\detect-arch.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\detect-coverage.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\detect-install-dirs.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\detect-intrinsics.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\detect-sanitizer.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\fallback-macros.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-aarch64.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-arm.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-armhf.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-llvm-mingw-aarch64.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-llvm-mingw-armv7.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-llvm-mingw-i686.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-llvm-mingw-x86_64.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-loongarch64-gcc-14.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-mingw-i686.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-mingw-x86_64.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-mips.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-mips64.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-powerpc.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-powerpc64-clang.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-powerpc64-power9.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-powerpc64.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-powerpc64le-clang.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-powerpc64le-power9.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-powerpc64le.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-riscv-clang.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-riscv.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-s390x.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\cmake\toolchain-sparc64.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\add-subdirectory-project\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\benchmarks\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\benchmarks\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\cmake\compress-and-verify.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\cmake\run-and-compare.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\cmake\run-and-redirect.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\cmake\test-cves.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\cmake\test-data.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\cmake\test-issues.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\cmake\test-tools.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\fuzz\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\pigz\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\test\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\ppmd\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\nrd\1-Deploy.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\nrd\2-Build.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\nrd\3-PrepareSDK.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\nrd\4-Clean.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\nrd\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\nrd\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\sharc\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\stb\tests\caveview\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\stb\tests\oversample\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\stb\tools\mr.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\stb\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\tinyexpr\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vma\src\Shaders\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vma\src\Shaders\CompileShaders.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vma\src\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vma\tools\GpuMemDumpVis\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vma\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vma\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\volk\test\cmake_using_installed_headers\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\volk\test\cmake_using_source_directly\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\volk\test\cmake_using_subdir_headers\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\volk\test\cmake_using_subdir_static\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\volk\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\volk\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vulkan_headers\tests\integration\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vulkan_headers\tests\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vulkan_headers\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vulkan_headers\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_frame_generation\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_frame_generation\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_low_latency\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_low_latency\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_super_resolution_dx11\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_super_resolution_dx11\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_super_resolution_dx12\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_super_resolution_dx12\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_super_resolution_vk\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_super_resolution_vk\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\src\core\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\src\shader\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\src\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\4.4.3\CMakeSystem.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\4.4.3\CMakeRCCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\4.4.3\CMakeCCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\4.4.3\CMakeCXXCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\shadermake\shadermake-gitclone.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\shadermake\download.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\shadermake\shadermake-gitupdate.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\shadermake\update.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\shadermake\patch.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\mathlib\mathlib-gitclone.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\mathlib\download.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\mathlib\mathlib-gitupdate.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\mathlib\update.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\fc-tmp\mathlib\patch.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeFiles\VerifyGlobs.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\CMakeFiles\Export\f367bd07922f2ecfc14cf5547f1f7c4e\glfw3Targets.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\CMakeFiles\Export\f367bd07922f2ecfc14cf5547f1f7c4e\glfw3Targets-debug.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\CMakeFiles\Export\f367bd07922f2ecfc14cf5547f1f7c4e\glfw3Targets-release.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\CMakeFiles\Export\f367bd07922f2ecfc14cf5547f1f7c4e\glfw3Targets-minsizerel.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\CMakeFiles\Export\f367bd07922f2ecfc14cf5547f1f7c4e\glfw3Targets-relwithdebinfo.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\src\glfw3Config.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\src\glfw3ConfigVersion.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\src\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\docs\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\cmake_uninstall.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\glfw\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\volk\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\vma\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\DLSS\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\opticalflow\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\frameinterpolation\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\fsr3\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\fsr3upscaler\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\fsr2\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\fsr1\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\spd\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\cacao\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\lpm\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\blur\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\vrs\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\cas\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\dof\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\lens\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\parallelsort\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\denoiser\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\sssr\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\brixelizer\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\brixelizergi\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\classifier\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\components\breadcrumbs\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\src\backends\vk\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\sdk\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\FidelityFX-SDK\ffx-api\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\nrd\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\minizip-ng\CMakeFiles\Export\4fe77da0f4d2c94dd906efce3aa1c0aa\minizip-debug.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\minizip-ng\CMakeFiles\Export\4fe77da0f4d2c94dd906efce3aa1c0aa\minizip-release.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\minizip-ng\CMakeFiles\Export\4fe77da0f4d2c94dd906efce3aa1c0aa\minizip-minsizerel.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\minizip-ng\CMakeFiles\Export\4fe77da0f4d2c94dd906efce3aa1c0aa\minizip-relwithdebinfo.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\minizip-ng\CMakeFiles\Export\4fe77da0f4d2c94dd906efce3aa1c0aa\minizip.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\minizip-ng\minizip-config-version.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\minizip-ng\minizip-config.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\minizip-ng\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\json\nlohmann_jsonConfigVersion.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\json\nlohmann_jsonConfig.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\extern\json\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-build\ShaderMake-prefix\tmp\ShaderMake-mkdirs.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-build\build\CMakeFiles\4.4.3\CMakeSystem.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-build\build\CMakeFiles\4.4.3\CMakeRCCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-build\build\CMakeFiles\4.4.3\CMakeCCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-build\build\CMakeFiles\4.4.3\CMakeCXXCompiler.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-build\build\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-build\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-src\ShaderMake\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-src\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\shadermake-src\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\dxc-subbuild\CMakeFiles\4.4.3\CMakeSystem.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\dxc-subbuild\dxc-populate-prefix\tmp\dxc-populate-mkdirs.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\dxc-subbuild\dxc-populate-prefix\src\dxc-populate-stamp\download-dxc-populate.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\dxc-subbuild\dxc-populate-prefix\src\dxc-populate-stamp\verify-dxc-populate.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\dxc-subbuild\dxc-populate-prefix\src\dxc-populate-stamp\extract-dxc-populate.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\dxc-subbuild\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\dxc-subbuild\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\mathlib-build\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\mathlib-src\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\mathlib-src\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-subbuild\CMakeFiles\4.4.3\CMakeSystem.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-subbuild\zlib-populate-prefix\tmp\zlib-populate-mkdirs.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-subbuild\zlib-populate-prefix\tmp\zlib-populate-gitclone.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-subbuild\zlib-populate-prefix\tmp\zlib-populate-gitupdate.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-subbuild\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-subbuild\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\CMakeFiles\Export\74a773ded784692c5e5de9162942044e\zlib-ng-targets.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\CMakeFiles\Export\74a773ded784692c5e5de9162942044e\zlib-ng-targets-debug.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\CMakeFiles\Export\74a773ded784692c5e5de9162942044e\zlib-ng-targets-release.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\CMakeFiles\Export\74a773ded784692c5e5de9162942044e\zlib-ng-targets-minsizerel.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\CMakeFiles\Export\74a773ded784692c5e5de9162942044e\zlib-ng-targets-relwithdebinfo.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\CMakeFiles\CTestScript.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\zlib-ng-config.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\zlib-ng-config-version.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\zlib-build\CTestTestfile.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\ppmd-subbuild\CMakeFiles\4.4.3\CMakeSystem.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\ppmd-subbuild\ppmd-populate-prefix\tmp\ppmd-populate-mkdirs.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\ppmd-subbuild\ppmd-populate-prefix\tmp\ppmd-populate-gitclone.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\ppmd-subbuild\ppmd-populate-prefix\tmp\ppmd-populate-gitupdate.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\ppmd-subbuild\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\ppmd-subbuild\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\src\core\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\src\shader\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\src\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CPackConfig.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CPackSourceConfig.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\cmake_install.cmake
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\CMakeLists.txt
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\build.gradle
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\gradle.properties
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\gradlew.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\README.md
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\RUN_AFTER_BUILD.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\settings.gradle
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\RUN_DEBUG.bat
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\BUILD_VIALUMIX_NATIVE.bat
+
+==================== GENTOOL / JNI / GENERATED ====================
+
+==================== HEADERS JNI SPECIFIQUES ====================
+
+
+==================== CLASSES JAVA / KOTLIN RADIANCE ====================
+
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 7
+Line       : /** Native boundary used by the Vialumix renderer. */
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 8
+Line       : public final class VialumixNative {
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 21
+Line       :         // Radiance stores its native renderer and optional runtimes beside the instance-local
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 72
+Line       :     private static native boolean nativeSupportsRayTracing();
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 73
+Line       :     private static native boolean nativeStartRenderer();
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 74
+Line       :     private static native void nativeStopRenderer();
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 75
+Line       :     private static native boolean nativeIsRendererReady();
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 76
+Line       :     private static native boolean nativeSupportsDLSS();
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 77
+Line       :     private static native boolean nativeSupportsRayReconstruction();
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 78
+Line       :     private static native boolean nativeSupportsFrameGeneration();
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\rt\VialumixNative.java
+LineNumber : 79
+Line       :     private static native void nativeSetDlssRuntimePath(String path);
+
+Path       : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\src\main\java\com\vialumix\config\VialumixConfig.java
+LineNumber : 13
+Line       :     /** Rendering backend: IRIS keeps the normal Sodium/Iris path; VULKAN uses the Vialumix native backend. */
+
+
+
+
+
+==================== REFERENCES OPTIONS / PIPELINE ====================
+
+
+==================== MCVR CMAKE ====================
+cmake_minimum_required(VERSION 3.15)
+
+project(minecraft-vulkan-renderer LANGUAGES C CXX)
+
+if(NOT DEFINED JAVA_PROJECT_ROOT_DIR OR "${JAVA_PROJECT_ROOT_DIR}" STREQUAL "")
+    message(FATAL_ERROR "JAVA_PROJECT_ROOT_DIR is required. Pass -DJAVA_PROJECT_ROOT_DIR=/path/to/root/of/the/java/project/")
+else()
+    file(TO_CMAKE_PATH "${JAVA_PROJECT_ROOT_DIR}" JAVA_PROJECT_ROOT_DIR)
+    message(STATUS "JAVA_PROJECT_ROOT_DIR: ${JAVA_PROJECT_ROOT_DIR}")
+endif()
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 23)
+add_compile_definitions($<$<CONFIG:Debug>:DEBUG>)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+if(NOT MSVC)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+    endif()
+endif()
+
+set(MCVR_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src ${JAVA_PROJECT_ROOT_DIR}/src/main/native/include/)
+message(STATUS "Include dir: ${MCVR_INCLUDE_DIR}")
+
+set(MCVR_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
+message(STATUS "Install bin dir: ${MCVR_INSTALL_BIN_DIR}")
+
+set(MCVR_INSTALL_LIB_DIR ${JAVA_PROJECT_ROOT_DIR}/src/main/resources/)
+message(STATUS "Install lib dir: ${MCVR_INSTALL_LIB_DIR}")
+
+include_directories(${MCVR_INCLUDE_DIR})
+
+# GLFW
+add_subdirectory(extern/glfw EXCLUDE_FROM_ALL)
+set(GLFW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/glfw/include)
+
+# Volk
+set(VOLK_BUILD_TESTS OFF CACHE BOOL "Disable tests")
+set(VOLK_BUILD_EXAMPLES OFF CACHE BOOL "Disable examples")
+add_subdirectory(extern/volk EXCLUDE_FROM_ALL)
+set(VOLK_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/volk)
+
+# VMA
+add_subdirectory(extern/vma EXCLUDE_FROM_ALL)
+set(VMA_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/vma/include)
+
+# GLM
+set(GLM_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/glm)
+
+# VK.XML
+set(VK_XML_PATH ${PROJECT_SOURCE_DIR}/extern/vulkan_headers/registry/vk.xml)
+
+# STB
+set(STB_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/stb)
+
+# tinyexpr
+add_library(tinyexpr STATIC extern/tinyexpr/tinyexpr.c)
+set_target_properties(tinyexpr PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set(TINYEXPR_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/tinyexpr)
+
+# DLSS
+add_subdirectory(extern/DLSS EXCLUDE_FROM_ALL)
+
+# JNI
+find_package(JNI REQUIRED)
+message(STATUS "${JNI_INCLUDE_DIRS}")
+message(STATUS "${JNI_LIBRARIES}")
+
+option(USE_AMD "Enable AMD specific optimizations/features" ON)
+if(USE_AMD)
+    message(STATUS "AMD Support Enabled")
+else()
+    message(STATUS "AMD Support Disabled")
+endif()
+
+option(MCVR_ENABLE_PROFILE_CONFIG "Enable the native profiler and CPU-sampling-friendly build flags" OFF)
+option(MCVR_ENABLE_PROFILER "Enable per-frame renderer profiler output" OFF)
+option(MCVR_ENABLE_CPU_PROFILE_FLAGS "Build native code with symbols and frame pointers for CPU profilers" OFF)
+set(MCVR_UI_BACKEND "OPENGL" CACHE STRING "UI backend to compile: OPENGL or VULKAN")
+string(TOUPPER "${MCVR_UI_BACKEND}" MCVR_UI_BACKEND)
+set_property(CACHE MCVR_UI_BACKEND PROPERTY STRINGS OPENGL VULKAN)
+if(NOT MCVR_UI_BACKEND STREQUAL "VULKAN" AND NOT MCVR_UI_BACKEND STREQUAL "OPENGL")
+    message(FATAL_ERROR "MCVR_UI_BACKEND must be VULKAN or OPENGL, got ${MCVR_UI_BACKEND}")
+endif()
+message(STATUS "MCVR UI backend: ${MCVR_UI_BACKEND}")
+if(MCVR_ENABLE_PROFILE_CONFIG)
+    set(MCVR_ENABLE_PROFILER ON CACHE BOOL "Enable per-frame renderer profiler output" FORCE)
+    set(MCVR_ENABLE_CPU_PROFILE_FLAGS ON CACHE BOOL "Build native code with symbols and frame pointers for CPU profilers" FORCE)
+endif()
+if(MCVR_ENABLE_PROFILER)
+    message(STATUS "MCVR Profiler Enabled")
+else()
+    message(STATUS "MCVR Profiler Disabled")
+endif()
+if(MCVR_ENABLE_CPU_PROFILE_FLAGS)
+    if(MSVC)
+        add_compile_options(/Zi)
+        add_link_options(/DEBUG)
+    else()
+        add_compile_options(-g -fno-omit-frame-pointer -fno-optimize-sibling-calls)
+        add_link_options(-g)
+    endif()
+    message(STATUS "MCVR CPU profile flags enabled")
+endif()
+
+set(MCVR_BUILT_IN_SHADER_PACKS vanilla-pt advanced)
+message(STATUS "Built-in shader packs: ${MCVR_BUILT_IN_SHADER_PACKS}")
+
+option(MCVR_ENABLE_FFX_UPSCALER "Enable FidelityFX Upscaler support" ON)
+if(MCVR_ENABLE_FFX_UPSCALER)
+    message(STATUS "FidelityFX Upscaler Enabled")
+
+    set(FFX_API_BACKEND VK_X64 CACHE STRING "FidelityFX API backend" FORCE)
+
+    set(FFX_DENOISER OFF CACHE BOOL "Build FFX Denoiser" FORCE)
+    set(FFX_ALL OFF CACHE BOOL "Build all FFX components" FORCE)
+    set(FFX_SSSR OFF CACHE BOOL "Build FFX SSSR" FORCE)
+    set(FFX_FSR3 ON CACHE BOOL "Build FFX FSR3" FORCE)
+    set(FFX_FSR3UPSCALER ON CACHE BOOL "Build FFX FSR3 Upscaler" FORCE)
+    set(FFX_FI ON CACHE BOOL "Build FFX Frame Interpolation" FORCE)
+    set(FFX_OF ON CACHE BOOL "Build FFX Optical Flow" FORCE)
+
+    set(FFX_AUTO_COMPILE_SHADERS ON CACHE BOOL "Compile shaders automatically as a prebuild step." FORCE)
+
+    set(FFX_BIN_PATH ${CMAKE_BINARY_DIR}/ffx_sdk CACHE STRING "FFX binary output path" FORCE)
+    add_subdirectory(extern/FidelityFX-SDK/ffx-api EXCLUDE_FROM_ALL)
+
+    if(TARGET ffx_backend_vk_x64)
+        target_include_directories(ffx_backend_vk_x64 PRIVATE ${VOLK_INCLUDE_DIR})
+    endif()
+
+else()
+    message(STATUS "FidelityFX Upscaler Disabled")
+endif()
+
+# NRD Denoiser
+option(MCVR_ENABLE_NRD "Enable NRD denoiser support" ON)
+if(MCVR_ENABLE_NRD)
+    message(STATUS "NRD Denoiser Enabled")
+
+    set(NRD_STATIC_LIBRARY ON CACHE BOOL "Build NRD as a static library" FORCE)
+    # MCVR consumes Vulkan shader bytecode. DirectX formats are optional build outputs.
+    set(NRD_EMBEDS_SPIRV_SHADERS ON CACHE BOOL "NRD embeds SPIRV shaders" FORCE)
+    option(NRD_EMBEDS_DXIL_SHADERS "NRD embeds DXIL shaders" OFF)
+    option(NRD_EMBEDS_DXBC_SHADERS "NRD embeds DXBC shaders" OFF)
+    set(REBLUR_PERFORMANCE_MODE ON CACHE BOOL "Use the NRD performance shader configuration" FORCE)
+    set(NRD_SHADERS_PATH "${PROJECT_SOURCE_DIR}/extern/nrd/_Shaders" CACHE STRING "NRD shader headers path" FORCE)
+    set(NRD_NORMAL_ENCODING "2" CACHE STRING "Normal encoding variant (0-4, matches nrd::NormalEncoding)" FORCE)
+    set(NRD_ROUGHNESS_ENCODING "1" CACHE STRING "Roughness encoding variant (0-2, matches nrd::RoughnessEncoding)" FORCE)
+
+    add_subdirectory(extern/nrd EXCLUDE_FROM_ALL)
+
+    set(NRD_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/nrd/Include)
+
+    if(TARGET NRD)
+        target_include_directories(NRD PRIVATE "${NRD_SHADERS_PATH}")
+    endif()
+else()
+    message(STATUS "NRD Denoiser Disabled")
+endif()
+
+# Intel XeSS
+option(MCVR_ENABLE_XESS "Enable Intel XeSS support" ON)
+if(MCVR_ENABLE_XESS)
+    set(XESS_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/xess/inc)
+    if(EXISTS "${XESS_INCLUDE_DIR}/xess/xess.h")
+        message(STATUS "Intel XeSS Enabled")
+    else()
+        message(WARNING "MCVR_ENABLE_XESS is ON but extern/xess is missing; building without XeSS backend.")
+        set(MCVR_ENABLE_XESS OFF)
+    endif()
+else()
+    message(STATUS "Intel XeSS Disabled")
+endif()
+
+# minizip
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
+set(MZ_BUILD_TESTS OFF CACHE BOOL "Disable minizip tests" FORCE)
+set(MZ_BUILD_UNIT_TESTS OFF CACHE BOOL "Disable minizip unit tests" FORCE)
+set(MZ_ZLIB ON CACHE BOOL "Enable Deflate support for shader pack archives" FORCE)
+set(MZ_BZIP2 OFF CACHE BOOL "Disable unused bzip2 support" FORCE)
+set(MZ_LZMA OFF CACHE BOOL "Disable unused LZMA support" FORCE)
+set(MZ_OPENSSL OFF CACHE BOOL "Disable unused encrypted archive support" FORCE)
+set(MZ_FETCH_LIBS ON CACHE BOOL "Fetch minizip dependencies automatically" FORCE)
+set(MZ_FORCE_FETCH_LIBS ON CACHE BOOL "Build Minizip dependencies from source" FORCE)
+set(MZ_ZSTD OFF CACHE BOOL "Disable zstd in minizip-ng due to upstream target mismatch" FORCE)
+add_subdirectory(extern/minizip-ng EXCLUDE_FROM_ALL)
+set_target_properties(minizip PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+# nlohmann json
+add_subdirectory(extern/json EXCLUDE_FROM_ALL)
+
+add_subdirectory(src)
+
+==================== MCVR CORE CMAKE ====================
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "*.cpp")
+if(NOT MCVR_ENABLE_PROFILER)
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*/profiler/.*\\.cpp$")
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*/com_radiance_client_profiler_Profiler\\.cpp$")
+endif()
+if(MCVR_UI_BACKEND STREQUAL "OPENGL")
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*/render/modules/ui_module\\.cpp$")
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*/com_radiance_client_proxy_vulkan_ShaderProxy\\.cpp$")
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*/com_radiance_client_proxy_vulkan_VulkanUiProxy\\.cpp$")
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*/com_radiance_client_proxy_vulkan_DrawCommandProxy_Overlay\\.cpp$")
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*/com_radiance_client_proxy_vulkan_PipelineStateProxy_.*\\.cpp$")
+else()
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*/com_radiance_client_opengl_ui_OpenGLUiProxy\\.cpp$")
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*/render/opengl_ui/.*\\.cpp$")
+endif()
+
+add_library(core SHARED ${SOURCE_FILES})
+target_link_libraries(core PUBLIC ngx ${JNI_LIBRARIES} VulkanMemoryAllocator volk::volk glfw minizip tinyexpr
+                                   nlohmann_json::nlohmann_json)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND MCVR_UI_BACKEND STREQUAL "OPENGL")
+    find_package(X11 REQUIRED)
+    target_link_libraries(core PRIVATE X11::X11)
+endif()
+
+if(DEFINED ENV{VULKAN_SDK} AND NOT "$ENV{VULKAN_SDK}" STREQUAL "")
+    set(MCVR_VULKAN_SDK "$ENV{VULKAN_SDK}")
+else()
+    set(MCVR_VULKAN_SDK "/home/jiong/VulkanSDK/1.4.328.1")
+endif()
+
+find_path(SHADERC_INCLUDE_DIR shaderc/shaderc.hpp
+    HINTS
+    "${MCVR_VULKAN_SDK}/x86_64/include"
+    "${MCVR_VULKAN_SDK}/include"
+)
+find_library(SHADERC_LIBRARY_RELEASE
+    NAMES shaderc_combined shaderc_shared shaderc
+    HINTS
+    "${MCVR_VULKAN_SDK}/x86_64/lib"
+    "${MCVR_VULKAN_SDK}/lib"
+)
+if(MSVC)
+    find_library(SHADERC_LIBRARY_DEBUG
+        NAMES shaderc_combinedd shaderc_sharedd shadercd
+        HINTS
+        "${MCVR_VULKAN_SDK}/lib"
+    )
+endif()
+include(SelectLibraryConfigurations)
+select_library_configurations(SHADERC)
+
+if(NOT SHADERC_INCLUDE_DIR OR NOT SHADERC_LIBRARY)
+    message(FATAL_ERROR "shaderc was not found. Set VULKAN_SDK or install shaderc.")
+endif()
+
+target_include_directories(core PUBLIC ${GENTOOL_OUTPUT_DIR} ${VOLK_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${VMA_INCLUDE_DIR} ${STB_INCLUDE_DIR} ${TINYEXPR_INCLUDE_DIR} ${JNI_INCLUDE_DIRS} ${GLM_INCLUDE_DIR} ${SHADERC_INCLUDE_DIR})
+target_link_libraries(core PUBLIC ${SHADERC_LIBRARY})
+target_compile_definitions(core PUBLIC VK_NO_PROTOTYPES CORE_LIB)
+if(USE_AMD)
+    target_compile_definitions(core PUBLIC USE_AMD)
+endif()
+if(MCVR_ENABLE_PROFILER)
+    target_compile_definitions(core PUBLIC MCVR_ENABLE_PROFILER)
+endif()
+if(MCVR_UI_BACKEND STREQUAL "OPENGL")
+    target_compile_definitions(core PUBLIC MCVR_UI_BACKEND_OPENGL)
+else()
+    target_compile_definitions(core PUBLIC MCVR_UI_BACKEND_VULKAN)
+endif()
+if(MCVR_ENABLE_FFX_UPSCALER)
+    target_link_libraries(core PUBLIC amd_fidelityfx_vk
+                                      ffx_backend_vk_x64
+                                      ffx_fsr3_x64
+                                      ffx_fsr3upscaler_x64
+                                      ffx_frameinterpolation_x64
+                                      ffx_opticalflow_x64)
+    target_compile_definitions(core PUBLIC MCVR_ENABLE_FFX_UPSCALER)
+endif()
+if(MCVR_ENABLE_NRD)
+    target_link_libraries(core PUBLIC NRD)
+    target_include_directories(core PUBLIC ${NRD_INCLUDE_DIR})
+    target_compile_definitions(core PUBLIC NRD_STATIC_LIBRARY=1)
+    target_compile_definitions(core PUBLIC MCVR_ENABLE_NRD)
+endif()
+if(MCVR_ENABLE_XESS)
+    find_library(XESS_RUNTIME_LIB
+        NAMES xess libxess
+        PATHS
+            "${PROJECT_SOURCE_DIR}/extern/xess/lib"
+            "${PROJECT_SOURCE_DIR}/extern/xess/bin"
+    )
+
+    if(XESS_RUNTIME_LIB)
+        target_link_libraries(core PUBLIC "${XESS_RUNTIME_LIB}")
+        target_include_directories(core PUBLIC ${XESS_INCLUDE_DIR})
+        target_compile_definitions(core PUBLIC MCVR_ENABLE_XESS)
+
+        if(WIN32)
+            file(GLOB XESS_RUNTIME_DLLS "${PROJECT_SOURCE_DIR}/extern/xess/bin/libxess*.dll")
+            if(XESS_RUNTIME_DLLS)
+                install(FILES ${XESS_RUNTIME_DLLS} DESTINATION ${MCVR_INSTALL_LIB_DIR})
+                install(FILES ${XESS_RUNTIME_DLLS} DESTINATION ${MCVR_INSTALL_BIN_DIR})
+            else()
+                message(WARNING "XeSS enabled and linked, but no runtime DLLs were found in extern/xess/bin.")
+            endif()
+        endif()
+    else()
+        message(WARNING "XeSS headers were found but no XeSS runtime library was found; building without XeSS backend.")
+    endif()
+endif()
+if(MSVC)
+    target_compile_definitions(core PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+    target_compile_options(core PRIVATE /utf-8)
+endif()
+
+set_target_properties(core PROPERTIES CXX_VISIBILITY_PRESET default VISIBILITY_INLINES_HIDDEN OFF)
+
+install(TARGETS core DESTINATION ${MCVR_INSTALL_LIB_DIR})
+install(TARGETS core DESTINATION ${MCVR_INSTALL_BIN_DIR})
+
+==================== NATIVE CMAKE ====================
+cmake_minimum_required(VERSION 3.24)
+project(vialumix_native LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(JNI REQUIRED)
+find_package(Vulkan REQUIRED)
+
+add_library(vialumix SHARED src/vialumix_jni.cpp)
+target_include_directories(vialumix PRIVATE ${JNI_INCLUDE_DIRS})
+target_link_libraries(vialumix PRIVATE Vulkan::Vulkan)
+
+if (WIN32)
+    set_target_properties(vialumix PROPERTIES OUTPUT_NAME "vialumix")
+elseif(UNIX)
+    set_target_properties(vialumix PROPERTIES OUTPUT_NAME "vialumix")
+endif()
+
+# Optional bridge to the real MCVR source tree supplied with the project. This is deliberately
+# opt-in because MCVR has its own third-party submodules and must be built with its matching
+# generated JNI headers. Configure with -DVIALUMIX_MCVR_ROOT=<path> when building the native backend.
+set(VIALUMIX_MCVR_ROOT "" CACHE PATH "Path to a checked-out MCVR source tree")
+if (VIALUMIX_MCVR_ROOT AND EXISTS "${VIALUMIX_MCVR_ROOT}/CMakeLists.txt")
+    message(STATUS "Vialumix: MCVR bridge source detected at ${VIALUMIX_MCVR_ROOT}")
+    add_subdirectory("${VIALUMIX_MCVR_ROOT}" "${CMAKE_BINARY_DIR}/mcvr")
+else()
+    message(STATUS "Vialumix: standalone native capability probe; MCVR bridge not configured")
+endif()
+
+==================== CMAKE CACHE ====================
+---- D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\CMakeCache.txt ----
+# For build in directory: d:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build
+CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/CMakeFiles/pkgRedirects
+CMAKE_GENERATOR_PLATFORM:STRING=x64
+FETCHCONTENT_BASE_DIR:PATH=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/_deps
+FFX_API_vk_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/extern/FidelityFX-SDK/ffx-api
+FFX_API_vk_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/FidelityFX-SDK/ffx-api
+FFX_BIN_PATH:STRING=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/ffx_sdk
+FidelityFX-SDK_VK_x64_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/extern/FidelityFX-SDK/ffx-api/sdk
+FidelityFX-SDK_VK_x64_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/FidelityFX-SDK/sdk
+GLFW_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/extern/glfw
+GLFW_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/glfw
+//Java AWT Native Interface include directory
+JAVA_AWT_INCLUDE_PATH:PATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include
+//Java AWT Native Interface library
+JAVA_AWT_LIBRARY:FILEPATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/lib/jawt.lib
+//JNI include directory
+JAVA_INCLUDE_PATH:PATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include
+//jni_md.h jniport.h include directory
+JAVA_INCLUDE_PATH2:PATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include/win32
+//Java Virtual Machine library
+JAVA_JVM_LIBRARY:FILEPATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/lib/jvm.lib
+JAVA_PROJECT_ROOT_DIR:UNINITIALIZED=D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14
+MCVR_ENABLE_CPU_PROFILE_FLAGS:BOOL=OFF
+MCVR_ENABLE_FFX_UPSCALER:BOOL=ON
+MCVR_ENABLE_NRD:BOOL=ON
+MCVR_ENABLE_PROFILER:BOOL=OFF
+MCVR_ENABLE_PROFILE_CONFIG:BOOL=OFF
+MCVR_ENABLE_XESS:BOOL=ON
+MCVR_UI_BACKEND:STRING=OPENGL
+NRD_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/extern/nrd
+NRD_SHADERS_PATH:STRING=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/nrd/_Shaders
+NRD_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/nrd
+SHADERMAKE_DXC_PATH:UNINITIALIZED=D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\dxc-src\bin\x64\dxc.exe
+ShaderMakeAll_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/_deps/shadermake-build
+ShaderMakeAll_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/_deps/shadermake-src
+VMA_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/extern/vma
+VMA_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/vma
+XESS_RUNTIME_LIB:FILEPATH=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/xess/lib/libxess.lib
+minecraft-vulkan-renderer_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build
+minecraft-vulkan-renderer_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr
+minizip-ng_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/extern/minizip-ng
+minizip-ng_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/minizip-ng
+nlohmann_json_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/extern/json
+nlohmann_json_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/json
+volk_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/extern/volk
+volk_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/volk
+zlib_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/_deps/zlib-build
+zlib_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/extern/minizip-ng/third_party/zlib
+CMAKE_CACHEFILE_DIR:INTERNAL=d:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build
+CMAKE_GENERATOR:INTERNAL=Visual Studio 18 2026
+CMAKE_GENERATOR_INSTANCE:INTERNAL=C:/Program Files/Microsoft Visual Studio/18/Community
+CMAKE_GENERATOR_TOOLSET:INTERNAL=
+CMAKE_HOME_DIRECTORY:INTERNAL=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr
+//Details about finding JNI
+FIND_PACKAGE_MESSAGE_DETAILS_JNI:INTERNAL=[C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include][C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include/win32][found components: AWT JVM ][v()]
+//ADVANCED property for variable: JAVA_AWT_INCLUDE_PATH
+JAVA_AWT_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_AWT_LIBRARY
+JAVA_AWT_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_INCLUDE_PATH
+JAVA_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_INCLUDE_PATH2
+JAVA_INCLUDE_PATH2-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_JVM_LIBRARY
+JAVA_JVM_LIBRARY-ADVANCED:INTERNAL=1
+//Test JNI_INCLUDE_PATH2_OPTIONAL
+JNI_INCLUDE_PATH2_OPTIONAL:INTERNAL=
+//STRINGS property for variable: MCVR_UI_BACKEND
+MCVR_UI_BACKEND-STRINGS:INTERNAL=OPENGL;VULKAN
+SHADERMAKE_DXC_VK_PATH:INTERNAL=D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\build\_deps\dxc-src\bin\x64\dxc.exe
+SHADERMAKE_PATH:INTERNAL=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/mcvr/build/_deps/shadermake-build/build/Release/ShaderMake.exe
+---- D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build\CMakeCache.txt ----
+# For build in directory: d:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build
+CMAKE_BUILD_TYPE:UNINITIALIZED=Release
+CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build/CMakeFiles/pkgRedirects
+CMAKE_INSTALL_PREFIX:PATH=C:/Program Files/vialumix_native
+CMAKE_PROJECT_NAME:STATIC=vialumix_native
+//Java AWT Native Interface include directory
+JAVA_AWT_INCLUDE_PATH:PATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include
+//Java AWT Native Interface library
+JAVA_AWT_LIBRARY:FILEPATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/lib/jawt.lib
+JAVA_HOME:UNINITIALIZED=C:\Program Files\Eclipse Adoptium\jdk-25.0.4.101-hotspot"     -DVULKAN_SDK=C:\VulkanSDK\1.4.363.0
+//JNI include directory
+JAVA_INCLUDE_PATH:PATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include
+//jni_md.h jniport.h include directory
+JAVA_INCLUDE_PATH2:PATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include/win32
+//Java Virtual Machine library
+JAVA_JVM_LIBRARY:FILEPATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/lib/jvm.lib
+//Path to a checked-out MCVR source tree
+VIALUMIX_MCVR_ROOT:PATH=
+vialumix_native_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build
+vialumix_native_IS_TOP_LEVEL:STATIC=ON
+vialumix_native_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native
+CMAKE_CACHEFILE_DIR:INTERNAL=d:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build
+CMAKE_GENERATOR:INTERNAL=Visual Studio 18 2026
+CMAKE_GENERATOR_INSTANCE:INTERNAL=C:/Program Files/Microsoft Visual Studio/18/Community
+CMAKE_GENERATOR_PLATFORM:INTERNAL=x64
+CMAKE_GENERATOR_TOOLSET:INTERNAL=
+CMAKE_HOME_DIRECTORY:INTERNAL=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native
+//Details about finding JNI
+FIND_PACKAGE_MESSAGE_DETAILS_JNI:INTERNAL=[C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include][C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include/win32][found components: AWT JVM ][v()]
+//ADVANCED property for variable: JAVA_AWT_INCLUDE_PATH
+JAVA_AWT_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_AWT_LIBRARY
+JAVA_AWT_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_INCLUDE_PATH
+JAVA_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_INCLUDE_PATH2
+JAVA_INCLUDE_PATH2-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_JVM_LIBRARY
+JAVA_JVM_LIBRARY-ADVANCED:INTERNAL=1
+//Test JNI_INCLUDE_PATH2_OPTIONAL
+JNI_INCLUDE_PATH2_OPTIONAL:INTERNAL=
+---- D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build-x64\CMakeCache.txt ----
+# For build in directory: d:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build-x64
+CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build-x64/CMakeFiles/pkgRedirects
+CMAKE_INSTALL_PREFIX:PATH=C:/Program Files/vialumix_native
+CMAKE_PROJECT_NAME:STATIC=vialumix_native
+//Java AWT Native Interface include directory
+JAVA_AWT_INCLUDE_PATH:PATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include
+//Java AWT Native Interface library
+JAVA_AWT_LIBRARY:FILEPATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/lib/jawt.lib
+//JNI include directory
+JAVA_INCLUDE_PATH:PATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include
+//jni_md.h jniport.h include directory
+JAVA_INCLUDE_PATH2:PATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include/win32
+//Java Virtual Machine library
+JAVA_JVM_LIBRARY:FILEPATH=C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/lib/jvm.lib
+//Path to a checked-out MCVR source tree
+VIALUMIX_MCVR_ROOT:PATH=
+vialumix_native_BINARY_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build-x64
+vialumix_native_IS_TOP_LEVEL:STATIC=ON
+vialumix_native_SOURCE_DIR:STATIC=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native
+CMAKE_CACHEFILE_DIR:INTERNAL=d:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native/build-x64
+CMAKE_GENERATOR:INTERNAL=Visual Studio 18 2026
+CMAKE_GENERATOR_INSTANCE:INTERNAL=C:/Program Files/Microsoft Visual Studio/18/Community
+CMAKE_GENERATOR_PLATFORM:INTERNAL=x64
+CMAKE_GENERATOR_TOOLSET:INTERNAL=
+CMAKE_HOME_DIRECTORY:INTERNAL=D:/...Vialumix Dev/Vialumix 1.20.1/vialumix_main-1.20.1-dev0.11.14/native
+//Details about finding JNI
+FIND_PACKAGE_MESSAGE_DETAILS_JNI:INTERNAL=[C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include][C:/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot/include/win32][found components: AWT JVM ][v()]
+//ADVANCED property for variable: JAVA_AWT_INCLUDE_PATH
+JAVA_AWT_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_AWT_LIBRARY
+JAVA_AWT_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_INCLUDE_PATH
+JAVA_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_INCLUDE_PATH2
+JAVA_INCLUDE_PATH2-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_JVM_LIBRARY
+JAVA_JVM_LIBRARY-ADVANCED:INTERNAL=1
+//Test JNI_INCLUDE_PATH2_OPTIONAL
+JNI_INCLUDE_PATH2_OPTIONAL:INTERNAL=
+
+==================== DOSSIERS SUSPECTS ====================
+
+FullName                                                                                                                                                                                             
+--------                                                                                                                                                                                             
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\.gradle\loom-cache\remapped_mods\net_fabricmc_yarn_1_20_1_1_20_1_build_10_v2\net\fabricmc\fabric-api\fabric-data-generation-api-v1
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\build\generated                                                                                                                   
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\build\generated\sources\headers                                                                                                   
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\vulkan_headers                                                                                                        
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\FidelityFX-SDK\framework\cauldron\framework\libs\dxheaders                                                            
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\json\tools\generate_natvis                                                                                            
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\zlib\arch\generic                                                                              
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\minizip-ng\third_party\ppmd\CPP\7zip\UI\Agent                                                                         
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\volk\test\cmake_using_installed_headers                                                                               
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\volk\test\cmake_using_subdir_headers                                                                                  
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\doc\xess_frame_generation_doxygen                                                                                
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\doc\xess_super_resolution_doxygen                                                                                
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\extern\xess\samples\basic_sample_frame_generation                                                                            
+
+
+
+
+==================== HEADERS JNI DANS MCVR ====================
+
+FullName                                                                                                  
+--------                                                                                                  
+D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\mcvr\src\core\middleware\jni_export.hpp
+
+
+
+
+==================== FIN ====================
+Diagnostic terminé.
+Rapport : D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\vialumix_diagnostic.txt

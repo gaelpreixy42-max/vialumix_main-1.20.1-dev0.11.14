@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url = 'https://maven.terraformersmc.com/releases/' }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+// Fabric Loom injects the Minecraft/library repositories it needs at project level.
+// Do not use dependencyResolutionManagement here: with PREFER_SETTINGS Gradle can
+// ignore Loom's injected repositories (notably the Mojang libraries repository).
+rootProject.name = 'Vialumix'

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build\x64\Release\ZERO_CHECK</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build\Release\vialumix.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\build\x64\Release\ALL_BUILD</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles />
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>
