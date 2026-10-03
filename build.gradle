@@ -39,7 +39,44 @@ dependencies {
 
 processResources {
     inputs.property 'version', project.version
+    // The Radiance/MCVR renderer is a standalone Vulkan renderer and cannot be
+    // loaded alongside Sodium's OpenGL context hooks in this profile.
+    exclude 'Radiance-0.1.6-alpha-fabric-1.20.1-windows.jar'
+    exclude 'fabric.mcvr.json'
     filesMatching('fabric.mod.json') { expand 'version': project.version }
+}
+
+// A separate profile artifact for validating MCVR before attempting any Iris shaderpack integration.
+// It explicitly excludes Sodium and Iris because the full Radiance Vulkan renderer is not a drop-in
+// post-processing pass for their OpenGL pipeline.
+tasks.register('mcvrJar', Jar) {
+    dependsOn tasks.named('remapJar')
+    archiveClassifier = 'mcvr'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from({ zipTree(tasks.named('remapJar').get().archiveFile.get().asFile) }) {
+        exclude 'fabric.mod.json'
+        exclude 'fabric.mcvr.json'
+        exclude 'Radiance-0.1.6-alpha-fabric-1.20.1-windows.jar'
+    }
+    from('src/main/resources/fabric.mcvr.json') {
+        rename { 'fabric.mod.json' }
+        filter { line -> line.replace('${version}', project.version.toString()) }
+    }
+    from('mcvr/Radiance-0.1.6-alpha-fabric-1.20.1-windows.jar')
+    from('LICENSE') { rename { "${it}_vialumix" } }
+    from('mcvr/LICENSE.md') { rename { 'LICENSE_MCVR' } }
+}
+
+tasks.named('assemble') {
+    dependsOn tasks.named('mcvrJar')
+}
+
+// Keep a fresh remapped input path; Loom's previous output may still be open in another process.
+tasks.named('remapJar') {
+    archiveClassifier = 'remap'
+}
+tasks.named('remapSourcesJar') {
+    archiveClassifier = 'remap-sources'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -54,6 +91,8 @@ java {
 }
 
 jar {
+    exclude 'Radiance-0.1.6-alpha-fabric-1.20.1-windows.jar'
+    exclude 'fabric.mcvr.json'
     from('LICENSE') { rename { "${it}_vialumix" } }
 }
 

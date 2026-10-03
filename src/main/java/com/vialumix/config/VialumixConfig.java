@@ -30,6 +30,30 @@ public final class VialumixConfig {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+    public VialumixConfig copy() {
+        VialumixConfig copy = new VialumixConfig();
+        copy.copyFrom(this);
+        return copy;
+    }
+
+    public void copyFrom(VialumixConfig other) {
+        rayTracing = other.rayTracing;
+        backend = other.backend;
+        rayTracedShadows = other.rayTracedShadows;
+        rayTracedReflections = other.rayTracedReflections;
+        rayTracedGI = other.rayTracedGI;
+        rayTracedAO = other.rayTracedAO;
+        rayReconstruction = other.rayReconstruction;
+        denoiser = other.denoiser;
+        shaderpack = other.shaderpack;
+        upscaler = other.upscaler;
+        dlssQuality = other.dlssQuality;
+        frameGeneration = other.frameGeneration;
+        resolution = other.resolution;
+        renderDistance = other.renderDistance;
+        graphicsQuality = other.graphicsQuality;
+    }
+
     public static VialumixConfig load(Path file) {
         try {
             if (!Files.exists(file)) return new VialumixConfig();

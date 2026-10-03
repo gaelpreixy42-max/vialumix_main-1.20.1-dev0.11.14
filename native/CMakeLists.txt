@@ -7,7 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(JNI REQUIRED)
 find_package(Vulkan REQUIRED)
 
-add_library(vialumix SHARED src/vialumix_jni.cpp)
+add_library(vialumix SHARED
+    src/vialumix_jni.cpp
+    src/vulkan_gl_interop_probe.cpp
+    src/vulkan_gl_image_probe.cpp
+)
 target_include_directories(vialumix PRIVATE ${JNI_INCLUDE_DIRS})
 target_link_libraries(vialumix PRIVATE Vulkan::Vulkan)
 

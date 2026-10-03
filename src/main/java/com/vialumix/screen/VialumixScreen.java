@@ -10,8 +10,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.text.Text;
 
-import java.util.List;
-
 public final class VialumixScreen extends Screen {
     private final Screen parent;
     private final VialumixConfig cfg;
@@ -25,21 +23,16 @@ public final class VialumixScreen extends Screen {
     public VialumixScreen(Screen parent) {
         super(Text.translatable("vialumix.title"));
         this.parent = parent;
-        this.cfg = VialumixClient.config();
+        this.cfg = VialumixClient.config().copy();
+        if (cfg.shaderpack == null || cfg.shaderpack.isBlank()) {
+            cfg.shaderpack = VialumixClient.shaderpacks().currentSelection();
+        }
     }
 
     @Override
     protected void init() {
         int left = (width - panelWidth) / 2;
         int y = 48;
-
-        addDrawableChild(ButtonWidget.builder(Text.translatable("vialumix.button.minecraft"), b -> {
-            VialumixClient.save();
-            client.setScreen(parent);
-        }).dimensions(left, y, (panelWidth - 8) / 2, 24).build());
-        addDrawableChild(ButtonWidget.builder(Text.translatable("vialumix.button.vialumix"), b -> {
-        }).dimensions(left + (panelWidth + 8) / 2, y, (panelWidth - 8) / 2, 24).build());
-        y += 36;
 
         resolutionButton = addDrawableChild(ButtonWidget.builder(
                 Text.translatable("vialumix.graphics.resolution").append(": ").append(resolutionText()),
@@ -59,56 +52,66 @@ public final class VialumixScreen extends Screen {
         ).dimensions(left, y, panelWidth, 24).build());
         y += 38;
 
-        List<String> packs = VialumixClient.shaderpacks().packs();
         shaderButton = addDrawableChild(ButtonWidget.builder(
                 Text.translatable("vialumix.shaderpack")
                         .append(": ")
                         .append(VialumixClient.shaderpacks().displayName(cfg.shaderpack)),
-                b -> cycleShaderpack(packs)
+                b -> openShaderpackSelection()
         ).dimensions(left, y, panelWidth, 24).build());
         y += 31;
 
-        addDrawableChild(CyclingButtonWidget.onOffBuilder()
+        CyclingButtonWidget<Boolean> rayTracingButton = addDrawableChild(CyclingButtonWidget.onOffBuilder()
                 .initially(cfg.rayTracing)
-                .build(left, y, panelWidth, 24, Text.translatable("vialumix.ray_tracing"), (button, value) -> {
+                .build(left, y, panelWidth, 24, Text.translatable("vialumix.rt.bliss_screen_mode"), (button, value) -> {
+                    if (VialumixNative.isRadianceBackendAvailable()) {
+                        button.setValue(true);
+                        VialumixClient.notify("vialumix.rt.mcvr_always_active");
+                        return;
+                    }
                     if (value) {
-                        if (!VialumixNative.supportsRayTracing() || !VialumixNative.startRenderer()) {
+                        if (!VialumixNative.supportsRayTracing()
+                                && !VialumixClient.shaderpacks().supportsVialumixTracing(cfg.shaderpack)) {
                             button.setValue(false);
-                            VialumixClient.notify("vialumix.rt.backend_missing");
+                            VialumixClient.notify("vialumix.rt.bliss_required");
                             return;
                         }
-                    } else {
-                        VialumixNative.stopRenderer();
                     }
                     cfg.rayTracing = value;
-                    cfg.backend = value ? "vulkan" : "iris";
+                    cfg.backend = VialumixNative.supportsRayTracing() && value ? "vulkan" : "iris";
                 }));
+        if (VialumixNative.isRadianceBackendAvailable()) rayTracingButton.active = false;
         y += 31;
 
-        y = addToggle(left, y, "vialumix.rt.shadows", () -> cfg.rayTracedShadows, v -> cfg.rayTracedShadows = v);
-        y = addToggle(left, y, "vialumix.rt.reflections", () -> cfg.rayTracedReflections, v -> cfg.rayTracedReflections = v);
-        y = addToggle(left, y, "vialumix.rt.gi", () -> cfg.rayTracedGI, v -> cfg.rayTracedGI = v);
-        y = addToggle(left, y, "vialumix.rt.ao", () -> cfg.rayTracedAO, v -> cfg.rayTracedAO = v);
-        y = addToggle(left, y, "vialumix.rt.denoiser", () -> cfg.denoiser, v -> cfg.denoiser = v);
-        y = addToggle(left, y, "vialumix.rt.reconstruction", () -> cfg.rayReconstruction, v -> {
+        int halfWidth = (panelWidth - 8) / 2;
+        addToggle(left, y, halfWidth, "vialumix.rt.shadows", () -> cfg.rayTracedShadows, v -> cfg.rayTracedShadows = v);
+        addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.reflections", () -> cfg.rayTracedReflections, v -> cfg.rayTracedReflections = v);
+        y += 31;
+        addToggle(left, y, halfWidth, "vialumix.rt.gi", () -> cfg.rayTracedGI, v -> cfg.rayTracedGI = v);
+        addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.ao", () -> cfg.rayTracedAO, v -> cfg.rayTracedAO = v);
+        y += 31;
+        addToggle(left, y, halfWidth, "vialumix.rt.denoiser", () -> cfg.denoiser, v -> cfg.denoiser = v);
+        addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.reconstruction", () -> cfg.rayReconstruction, v -> {
             if (v && !VialumixNative.supportsRayReconstruction()) {
                 VialumixClient.notify("vialumix.dlss.rr_missing");
                 return;
             }
             cfg.rayReconstruction = v;
         });
+        y += 31;
 
         dlssButton = addDrawableChild(ButtonWidget.builder(
                 Text.translatable("vialumix.upscaler").append(": ").append(upscalerText()),
                 b -> cycleUpscaler()
         ).dimensions(left, y + 6, panelWidth, 24).build());
+        if (VialumixNative.isRadianceBackendAvailable()) dlssButton.active = false;
         y += 37;
 
-        addDrawableChild(ButtonWidget.builder(Text.translatable("vialumix.dlss.quality").append(": ").append(cfg.dlssQuality), b -> cycleDlssQuality())
+        ButtonWidget dlssQualityButton = addDrawableChild(ButtonWidget.builder(Text.translatable("vialumix.dlss.quality").append(": ").append(cfg.dlssQuality), b -> cycleDlssQuality())
                 .dimensions(left, y, panelWidth, 24).build());
+        if (VialumixNative.isRadianceBackendAvailable()) dlssQualityButton.active = false;
         y += 31;
 
-        addDrawableChild(CyclingButtonWidget.onOffBuilder()
+        CyclingButtonWidget<Boolean> frameGenerationButton = addDrawableChild(CyclingButtonWidget.onOffBuilder()
                 .initially(cfg.frameGeneration)
                 .build(left, y, panelWidth, 24, Text.translatable("vialumix.frame_generation"), (b, value) -> {
                     if (value && !VialumixNative.supportsFrameGeneration()) {
@@ -118,15 +121,61 @@ public final class VialumixScreen extends Screen {
                     }
                     cfg.frameGeneration = value;
                 }));
+        if (VialumixNative.isRadianceBackendAvailable()) frameGenerationButton.active = false;
         y += 40;
 
-        addDrawableChild(ButtonWidget.builder(Text.translatable("vialumix.apply"), b -> {
-            applyBasicGraphics();
-            VialumixClient.shaderpacks().apply(cfg.shaderpack);
-            close();
-        }).dimensions(left, y, (panelWidth - 8) / 2, 24).build());
+        addDrawableChild(ButtonWidget.builder(Text.translatable("vialumix.apply"), b -> applyAndClose())
+                .dimensions(left, y, (panelWidth - 8) / 2, 24).build());
         addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), b -> client.setScreen(parent))
                 .dimensions(left + (panelWidth + 8) / 2, y, (panelWidth - 8) / 2, 24).build());
+    }
+
+    private void applyAndClose() {
+        boolean radiance = VialumixNative.isRadianceBackendAvailable();
+        if (!radiance && "iris".equalsIgnoreCase(cfg.backend)) {
+            boolean queued = VialumixClient.shaderpacks().applyVialumixOptions(cfg.shaderpack,
+                    cfg.rayTracing && cfg.rayTracedReflections, cfg.rayTracing && cfg.rayTracedGI,
+                    cfg.rayTracing && cfg.rayTracedShadows, cfg.rayTracing && cfg.rayTracedAO);
+            if (cfg.rayTracing && !queued) {
+                cfg.rayTracing = false;
+                VialumixClient.config().copyFrom(cfg);
+                VialumixClient.notify("vialumix.rt.bliss_required");
+            }
+        }
+        // Apply window/graphics settings before Iris rebuilds the rendering pipeline.
+        applyBasicGraphics();
+        if (!VialumixClient.shaderpacks().apply(cfg.shaderpack)) {
+            VialumixClient.notify("vialumix.shaderpack.apply_failed");
+            return;
+        }
+
+        if (radiance) {
+            cfg.rayTracing = true;
+            cfg.backend = "vulkan";
+            if (cfg.shaderpack != null && cfg.shaderpack.endsWith("/advanced.zip")) {
+                int applied = com.vialumix.rt.RadianceRayTracingBridge.applyBlissInspiredPreset();
+                if (applied > 0) VialumixClient.notify("vialumix.rt.bliss_preset_applied");
+                else VialumixClient.notify("vialumix.rt.preset_apply_failed");
+            }
+        }
+        VialumixClient.config().copyFrom(cfg);
+        if (cfg.rayTracing && "iris".equalsIgnoreCase(cfg.backend)) {
+            // The Iris shaderpack reload above consumes the option queue prepared before applying it.
+        } else if (cfg.rayTracing) {
+            if (!VialumixNative.isRendererReady() && !VialumixNative.startRenderer()) {
+                cfg.rayTracing = false;
+                cfg.backend = "iris";
+                VialumixClient.config().copyFrom(cfg);
+                VialumixClient.notify("vialumix.rt.backend_missing");
+            }
+        } else if (VialumixNative.isRendererReady()) {
+            VialumixNative.stopRenderer();
+        }
+
+        if (cfg.rayTracing && !radiance) VialumixClient.notify("vialumix.rt.screen_space_notice");
+
+        VialumixClient.save();
+        client.setScreen(parent);
     }
 
     private void applyBasicGraphics() {
@@ -136,16 +185,25 @@ public final class VialumixScreen extends Screen {
         }
         switch (cfg.graphicsQuality) {
             case "fast" -> client.options.getGraphicsMode().setValue(net.minecraft.client.option.GraphicsMode.FAST);
-            case "fabulous" -> client.options.getGraphicsMode().setValue(net.minecraft.client.option.GraphicsMode.FABULOUS);
+            // Sodium's terrain renderer is not compatible with Minecraft's Fabulous framebuffer path.
+            case "fabulous" -> client.options.getGraphicsMode().setValue(net.minecraft.client.option.GraphicsMode.FANCY);
             default -> client.options.getGraphicsMode().setValue(net.minecraft.client.option.GraphicsMode.FANCY);
+        }
+        if (!"current".equals(cfg.resolution)) {
+            String[] size = cfg.resolution.split("x", 2);
+            if (size.length == 2) {
+                try {
+                    client.getWindow().setWindowedSize(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
+                } catch (NumberFormatException ignored) { }
+            }
         }
         client.options.write();
     }
 
-    private int addToggle(int x, int y, String label, BoolGetter getter, BoolSetter setter) {
-        addDrawableChild(CyclingButtonWidget.onOffBuilder().initially(getter.get())
-                .build(x, y, panelWidth, 24, Text.translatable(label), (b, v) -> setter.set(v)));
-        return y + 31;
+    private void addToggle(int x, int y, int width, String label, BoolGetter getter, BoolSetter setter) {
+        CyclingButtonWidget<Boolean> toggle = addDrawableChild(CyclingButtonWidget.onOffBuilder().initially(getter.get())
+                .build(x, y, width, 24, Text.translatable(label), (b, v) -> setter.set(v)));
+        if (VialumixNative.isRadianceBackendAvailable()) toggle.active = false;
     }
 
     private void cycleResolution() {
@@ -184,11 +242,12 @@ public final class VialumixScreen extends Screen {
         return Text.translatable("vialumix.graphics.quality." + cfg.graphicsQuality);
     }
 
-    private void cycleShaderpack(List<String> packs) {
-        if (packs.isEmpty()) { cfg.shaderpack = ""; updateShaderButton(); return; }
-        int current = packs.indexOf(cfg.shaderpack);
-        cfg.shaderpack = packs.get((current + 1 + packs.size()) % packs.size());
-        updateShaderButton();
+    private void openShaderpackSelection() {
+        VialumixClient.shaderpacks().scan();
+        client.setScreen(new ShaderpackSelectionScreen(this, cfg.shaderpack, selected -> {
+            cfg.shaderpack = selected;
+            updateShaderButton();
+        }));
     }
 
     private void updateShaderButton() {

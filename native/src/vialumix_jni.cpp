@@ -155,35 +155,15 @@ extern "C" JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeSetD
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeSupportsRayTracing(JNIEnv*, jclass) {
-    if (g_renderer_ready) return JNI_TRUE;
-    VkApplicationInfo app{VK_STRUCTURE_TYPE_APPLICATION_INFO};
-    app.pApplicationName = "Vialumix RT Probe";
-    app.applicationVersion = 1;
-    app.pEngineName = "Vialumix";
-    app.engineVersion = 1;
-    app.apiVersion = VK_API_VERSION_1_2;
-    VkInstanceCreateInfo ci{VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
-    ci.pApplicationInfo = &app;
-    VkInstance instance = VK_NULL_HANDLE;
-    if (vkCreateInstance(&ci, nullptr, &instance) != VK_SUCCESS) return JNI_FALSE;
-    uint32_t count = 0;
-    bool result = false;
-    if (vkEnumeratePhysicalDevices(instance, &count, nullptr) == VK_SUCCESS && count) {
-        std::vector<VkPhysicalDevice> devices(count);
-        vkEnumeratePhysicalDevices(instance, &count, devices.data());
-        for (auto d : devices) {
-            if (has_extension(d, VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME) &&
-                has_extension(d, VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME) &&
-                has_extension(d, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME) &&
-                has_rt_features(d)) { result = true; break; }
-        }
-    }
-    vkDestroyInstance(instance, nullptr);
-    return result ? JNI_TRUE : JNI_FALSE;
+    // The standalone Vialumix library only probes Vulkan capabilities. It does not
+    // contain MCVR's frame renderer and must never advertise that probe as working RT.
+    return JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeStartRenderer(JNIEnv*, jclass) {
-    return create_renderer() ? JNI_TRUE : JNI_FALSE;
+    // Creating a second, detached VkDevice does not render Minecraft and has caused
+    // misleading ready state. Renderer startup belongs to the MCVR bridge.
+    return JNI_FALSE;
 }
 
 extern "C" JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeStopRenderer(JNIEnv*, jclass) {

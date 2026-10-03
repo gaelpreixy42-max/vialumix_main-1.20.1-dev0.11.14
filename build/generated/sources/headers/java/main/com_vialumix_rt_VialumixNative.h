@@ -71,6 +71,38 @@ JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeSupportsFra
 JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeSetDlssRuntimePath
   (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeProbeVulkanInterop
+ * Signature: ([B)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_vialumix_rt_VialumixNative_nativeProbeVulkanInterop
+  (JNIEnv *, jclass, jbyteArray);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeCreateInteropImage
+ * Signature: ([B)[J
+ */
+JNIEXPORT jlongArray JNICALL Java_com_vialumix_rt_VialumixNative_nativeCreateInteropImage
+  (JNIEnv *, jclass, jbyteArray);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeCloseInteropHandle
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeCloseInteropHandle
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeDestroyInteropImage
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeDestroyInteropImage
+  (JNIEnv *, jclass);
+
 #ifdef __cplusplus
 }
 #endif

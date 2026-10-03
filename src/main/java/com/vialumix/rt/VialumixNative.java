@@ -3,6 +3,7 @@ package com.vialumix.rt;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import net.fabricmc.loader.api.FabricLoader;
 
 /** Native boundary used by the Vialumix renderer. */
 public final class VialumixNative {
@@ -14,6 +15,14 @@ public final class VialumixNative {
     private VialumixNative() {}
 
     public static synchronized void initialize(Path root) {
+        if (isRadianceBackendAvailable()) {
+            // Radiance owns MCVR's Vulkan renderer in the isolated MCVR artifact.
+            // Do not also load Vialumix's earlier standalone native probe.
+            loaded = false;
+            runtimeDirectory = root.toAbsolutePath().normalize();
+            dlssRuntime = new DlssRuntime(runtimeDirectory);
+            return;
+        }
         runtimeDirectory = Objects.requireNonNull(root).toAbsolutePath().normalize();
         dlssRuntime = new DlssRuntime(runtimeDirectory);
         try { Files.createDirectories(runtimeDirectory); } catch (Exception ignored) { }
@@ -50,20 +59,60 @@ public final class VialumixNative {
     public static DlssRuntime dlss() { return dlssRuntime; }
     public static String loadError() { return loadError; }
 
-    public static boolean supportsRayTracing() { return loaded && nativeSupportsRayTracing(); }
+    /** Compares Minecraft's current OpenGL adapter with Vulkan and probes exportable RT interop resources. */
+    public static String probeVulkanInterop(byte[] openGlDeviceLuid) {
+        if (!loaded) return "Vialumix native Vulkan probe unavailable: " + loadError;
+        if (openGlDeviceLuid == null) return "OpenGL did not expose a Windows device LUID; cannot match a Vulkan adapter.";
+        try {
+            return nativeProbeVulkanInterop(openGlDeviceLuid);
+        } catch (Throwable error) {
+            return "Vulkan/OpenGL interop probe failed: " + error.getClass().getSimpleName() + ": " + error.getMessage();
+        }
+    }
+
+    public static long[] createVulkanInteropImage(byte[] openGlDeviceLuid) {
+        if (!loaded) throw new IllegalStateException("Vialumix native Vulkan probe unavailable: " + loadError);
+        return nativeCreateInteropImage(openGlDeviceLuid);
+    }
+
+    public static void closeInteropHandle(long handle) { nativeCloseInteropHandle(handle); }
+    public static void destroyInteropImage() { if (loaded) nativeDestroyInteropImage(); }
+
+    /** True only for the dedicated artifact that includes Radiance/MCVR. */
+    public static boolean isRadianceBackendAvailable() {
+        return FabricLoader.getInstance().isModLoaded("radiance");
+    }
+
+    private static boolean isRadianceRendererReady() {
+        if (!isRadianceBackendAvailable()) return false;
+        try {
+            Class<?> entrypoint = Class.forName("com.radiance.client.RadianceClient", false,
+                    VialumixNative.class.getClassLoader());
+            Object directory = entrypoint.getField("radianceDir").get(null);
+            return directory instanceof Path;
+        } catch (ReflectiveOperationException | LinkageError ignored) {
+            return false;
+        }
+    }
+
+    public static boolean supportsRayTracing() { return isRadianceBackendAvailable(); }
 
     public static synchronized boolean startRenderer() {
-        return loaded && nativeStartRenderer();
+        if (isRadianceBackendAvailable()) return isRadianceRendererReady();
+        return false;
     }
 
     public static synchronized void stopRenderer() {
+        if (isRadianceBackendAvailable()) return; // MCVR hooks are installed at game startup.
         if (loaded) nativeStopRenderer();
     }
 
-    public static boolean isRendererReady() { return loaded && nativeIsRendererReady(); }
-    public static boolean supportsDLSS() { return loaded && dlssRuntime != null && dlssRuntime.hasSuperResolution() && nativeSupportsDLSS(); }
-    public static boolean supportsRayReconstruction() { return loaded && dlssRuntime != null && dlssRuntime.hasRayReconstruction() && nativeSupportsRayReconstruction(); }
-    public static boolean supportsFrameGeneration() { return loaded && dlssRuntime != null && dlssRuntime.hasFrameGeneration() && nativeSupportsFrameGeneration(); }
+    public static boolean isRendererReady() {
+        return isRadianceRendererReady();
+    }
+    public static boolean supportsDLSS() { return !isRadianceBackendAvailable() && loaded && dlssRuntime != null && dlssRuntime.hasSuperResolution() && nativeSupportsDLSS(); }
+    public static boolean supportsRayReconstruction() { return !isRadianceBackendAvailable() && loaded && dlssRuntime != null && dlssRuntime.hasRayReconstruction() && nativeSupportsRayReconstruction(); }
+    public static boolean supportsFrameGeneration() { return !isRadianceBackendAvailable() && loaded && dlssRuntime != null && dlssRuntime.hasFrameGeneration() && nativeSupportsFrameGeneration(); }
 
     public static boolean hasDlssRuntime() { return dlssRuntime != null && dlssRuntime.hasSuperResolution(); }
     public static boolean hasRayReconstructionRuntime() { return dlssRuntime != null && dlssRuntime.hasRayReconstruction(); }
@@ -77,4 +126,8 @@ public final class VialumixNative {
     private static native boolean nativeSupportsRayReconstruction();
     private static native boolean nativeSupportsFrameGeneration();
     private static native void nativeSetDlssRuntimePath(String path);
+    private static native String nativeProbeVulkanInterop(byte[] openGlDeviceLuid);
+    private static native long[] nativeCreateInteropImage(byte[] openGlDeviceLuid);
+    private static native void nativeCloseInteropHandle(long handle);
+    private static native void nativeDestroyInteropImage();
 }

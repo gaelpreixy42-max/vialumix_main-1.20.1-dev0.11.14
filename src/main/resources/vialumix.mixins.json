@@ -4,7 +4,9 @@
   "package": "com.vialumix.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "VideoOptionsScreenMixin"
+    "VideoOptionsScreenMixin",
+    "GameOptionsScreenAccessor",
+    "SodiumOptionsGUIMixin"
   ],
   "injectors": {
     "defaultRequire": 1

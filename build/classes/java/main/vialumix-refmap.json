@@ -1,7 +1,7 @@
 {
   "mappings": {
-    "com/vialumix/mixin/SodiumOptionsGUIMixin": {
-      "createScreen": "Lme/jellysquid/mods/sodium/client/gui/SodiumOptionsGUI;createScreen(Lnet/minecraft/class_437;)Lnet/minecraft/class_437;"
+    "com/vialumix/mixin/GameOptionsScreenAccessor": {
+      "parent": "field_21335:Lnet/minecraft/class_437;"
     },
     "com/vialumix/mixin/VideoOptionsScreenMixin": {
       "init": "Lnet/minecraft/class_446;method_25426()V"
@@ -9,8 +9,8 @@
   },
   "data": {
     "named:intermediary": {
-      "com/vialumix/mixin/SodiumOptionsGUIMixin": {
-        "createScreen": "Lme/jellysquid/mods/sodium/client/gui/SodiumOptionsGUI;createScreen(Lnet/minecraft/class_437;)Lnet/minecraft/class_437;"
+      "com/vialumix/mixin/GameOptionsScreenAccessor": {
+        "parent": "field_21335:Lnet/minecraft/class_437;"
       },
       "com/vialumix/mixin/VideoOptionsScreenMixin": {
         "init": "Lnet/minecraft/class_446;method_25426()V"

@@ -4,6 +4,12 @@
     <ClCompile Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\src\vialumix_jni.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\src\vulkan_gl_interop_probe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\src\vulkan_gl_image_probe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\CMakeLists.txt" />
