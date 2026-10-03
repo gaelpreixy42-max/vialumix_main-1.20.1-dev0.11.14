@@ -42,7 +42,7 @@ public final class NeuralRenderingScreen extends Screen {
         status = NeuralRendering.status();
         int left = (width - panelWidth) / 2;
         int half = (panelWidth - 8) / 2;
-        int y = 64;
+        int y = 76;
 
         addDrawableChild(CyclingButtonWidget.onOffBuilder().initially(cfg.neuralRendering)
                 .build(left, y, panelWidth, 20, Text.translatable("vialumix.neural.enable"), (b, v) -> cfg.neuralRendering = v));
@@ -128,9 +128,16 @@ public final class NeuralRenderingScreen extends Screen {
             case GPU_UNSUPPORTED -> { color = 0xFF7777; key = "vialumix.neural.status.gpu"; }
             default -> { color = 0xFFCC55; key = "vialumix.neural.status.plugin"; }
         }
-        context.drawCenteredTextWithShadow(textRenderer, Text.translatable(key), width / 2, 34, color);
+        var statusLines = textRenderer.wrapLines(Text.translatable(key), panelWidth);
+        for (int i = 0; i < statusLines.size(); i++) {
+            context.drawCenteredTextWithShadow(textRenderer, statusLines.get(i), width / 2, 32 + i * 10, color);
+        }
         if (status != NeuralRendering.Status.READY) {
-            context.drawCenteredTextWithShadow(textRenderer, Text.translatable("vialumix.neural.status.note"), width / 2, 46, 0xAAAAAA);
+            int lineY = 46;
+            for (var line : textRenderer.wrapLines(Text.translatable("vialumix.neural.status.note"), panelWidth)) {
+                context.drawCenteredTextWithShadow(textRenderer, line, width / 2, lineY, 0xAAAAAA);
+                lineY += 10;
+            }
         }
         super.render(context, mouseX, mouseY, delta);
     }
