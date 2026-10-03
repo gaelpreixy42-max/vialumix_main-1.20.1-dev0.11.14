@@ -122,10 +122,18 @@ JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeDestroyRayTraci
 /*
  * Class:     com_vialumix_rt_VialumixNative
  * Method:    nativeRtInit
- * Signature: ([B[B[B[B[B)Z
+ * Signature: ([B[B[B[B[B[B)Z
  */
 JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtInit
-  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtSetAtlas
+ * Signature: (Ljava/nio/ByteBuffer;II)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtSetAtlas
+  (JNIEnv *, jclass, jobject, jint, jint);
 
 /*
  * Class:     com_vialumix_rt_VialumixNative
@@ -157,6 +165,14 @@ JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtTrace
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtShutdown
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtLastMs
+ * Signature: ()F
+ */
+JNIEXPORT jfloat JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtLastMs
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

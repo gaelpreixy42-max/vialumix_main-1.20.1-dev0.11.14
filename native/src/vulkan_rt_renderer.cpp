@@ -22,9 +22,10 @@
 #endif
 
 namespace {
-constexpr int kImages = 3;
+constexpr int kImages = 5;   // exported to OpenGL: A, B, C (shadows/reflections) + D, E (AO/GI)
+constexpr int kHistory = 2;  // private temporal history for D and E
 constexpr VkFormat kFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-constexpr size_t kFrameBytes = 7 * 4 * sizeof(float);
+constexpr size_t kFrameBytes = 11 * 4 * sizeof(float);
 
 struct Buffer { VkBuffer handle = VK_NULL_HANDLE; VkDeviceMemory memory = VK_NULL_HANDLE; VkDeviceSize size = 0; void* mapped = nullptr; };
 struct Accel { VkAccelerationStructureKHR handle = VK_NULL_HANDLE; Buffer storage{}; };
@@ -55,6 +56,13 @@ struct Ctx {
     bool sceneReady = false;
 
     OutImage images[kImages]{};
+    OutImage history[kHistory]{};
+    VkImage atlasImage = VK_NULL_HANDLE; VkDeviceMemory atlasMemory = VK_NULL_HANDLE; VkImageView atlasView = VK_NULL_HANDLE; VkSampler atlasSampler = VK_NULL_HANDLE;
+    bool historyInitialised = false;
+    VkQueryPool queryPool = VK_NULL_HANDLE;
+    float timestampPeriod = 1.0f;
+    bool queryPending = false;
+    float lastMs = 0.0f;
     VkSemaphore semVkToGl = VK_NULL_HANDLE, semGlToVk = VK_NULL_HANDLE;
     bool imagesReady = false;
     uint32_t width = 0, height = 0;
@@ -204,10 +212,24 @@ void destroyImages() {
         if (img.memory) vkFreeMemory(c.device, img.memory, nullptr);
         img = {};
     }
+    for (auto& img : c.history) {
+        if (img.view) vkDestroyImageView(c.device, img.view, nullptr);
+        if (img.image) vkDestroyImage(c.device, img.image, nullptr);
+        if (img.memory) vkFreeMemory(c.device, img.memory, nullptr);
+        img = {};
+    }
+    c.historyInitialised = false;
     if (c.semVkToGl) vkDestroySemaphore(c.device, c.semVkToGl, nullptr);
     if (c.semGlToVk) vkDestroySemaphore(c.device, c.semGlToVk, nullptr);
     c.semVkToGl = c.semGlToVk = VK_NULL_HANDLE;
     c.imagesReady = false;
+}
+void destroyAtlas() {
+    if (!c.device) return;
+    if (c.atlasView) vkDestroyImageView(c.device, c.atlasView, nullptr);
+    if (c.atlasImage) vkDestroyImage(c.device, c.atlasImage, nullptr);
+    if (c.atlasMemory) vkFreeMemory(c.device, c.atlasMemory, nullptr);
+    c.atlasView = VK_NULL_HANDLE; c.atlasImage = VK_NULL_HANDLE; c.atlasMemory = VK_NULL_HANDLE;
 }
 void destroyGeometry() {
     for (int i = 0; i < 2; ++i) { destroyAccel(c.blas[i]); destroyBuffer(c.verts[i]); destroyBuffer(c.colors[i]); }
@@ -220,7 +242,10 @@ void shutdown() {
     destroyGeometry();
     destroyBuffer(c.frameUbo);
     destroyBuffer(c.sbt);
+    destroyAtlas();
+    if (c.device && c.atlasSampler) vkDestroySampler(c.device, c.atlasSampler, nullptr);
     if (c.device) {
+        if (c.queryPool) vkDestroyQueryPool(c.device, c.queryPool, nullptr);
         if (c.fence) vkDestroyFence(c.device, c.fence, nullptr);
         if (c.pipeline) vkDestroyPipeline(c.device, c.pipeline, nullptr);
         if (c.descPool) vkDestroyDescriptorPool(c.device, c.descPool, nullptr);
@@ -263,6 +288,7 @@ void createDevice(const uint8_t* luid) {
     VkPhysicalDeviceProperties2 p2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2}; p2.pNext = &c.rtProps;
     vkGetPhysicalDeviceProperties2(c.physical, &p2);
     c.rtProps.pNext = nullptr;
+    c.timestampPeriod = p2.properties.limits.timestampPeriod;
     c.scratchAlignment = std::max<VkDeviceSize>(asProps.minAccelerationStructureScratchOffsetAlignment, 128);
 
     float priority = 1.0f;
@@ -298,41 +324,45 @@ void createDevice(const uint8_t* luid) {
     require(vkAllocateCommandBuffers(c.device, &ai, &c.cmd), "vkAllocateCommandBuffers(frame)");
     VkFenceCreateInfo fci{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
     require(vkCreateFence(c.device, &fci, nullptr, &c.fence), "vkCreateFence");
+    VkQueryPoolCreateInfo qpci{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO}; qpci.queryType = VK_QUERY_TYPE_TIMESTAMP; qpci.queryCount = 2;
+    require(vkCreateQueryPool(c.device, &qpci, nullptr, &c.queryPool), "vkCreateQueryPool");
     c.frameUbo = makeBuffer(kFrameBytes, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
     std::memset(c.frameUbo.mapped, 0, kFrameBytes);
 }
 
-void createPipeline(const std::vector<uint32_t>& rgen, const std::vector<uint32_t>& miss, const std::vector<uint32_t>& shadowMiss, const std::vector<uint32_t>& chit) {
-    const VkShaderStageFlags rt = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
-    VkDescriptorSetLayoutBinding b[9]{};
+void createPipeline(const std::vector<uint32_t>& rgen, const std::vector<uint32_t>& miss, const std::vector<uint32_t>& shadowMiss, const std::vector<uint32_t>& chit, const std::vector<uint32_t>& ahit) {
+    const VkShaderStageFlags rt = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+    VkDescriptorSetLayoutBinding b[14]{};
     for (int i = 0; i < 3; ++i) { b[i].binding = i; b[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; b[i].descriptorCount = 1; b[i].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR; }
     b[3].binding = 3; b[3].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR; b[3].descriptorCount = 1; b[3].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
     b[4].binding = 4; b[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; b[4].descriptorCount = 1; b[4].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
     for (int i = 5; i < 9; ++i) { b[i].binding = i; b[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; b[i].descriptorCount = 1; b[i].stageFlags = rt; }
-    VkDescriptorSetLayoutCreateInfo dl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO}; dl.bindingCount = 9; dl.pBindings = b;
+    for (int i = 9; i < 13; ++i) { b[i].binding = i; b[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; b[i].descriptorCount = 1; b[i].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR; }
+    VkDescriptorSetLayoutCreateInfo dl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO}; b[13].binding = 13; b[13].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; b[13].descriptorCount = 1; b[13].stageFlags = rt;
+    dl.bindingCount = 14; dl.pBindings = b;
     require(vkCreateDescriptorSetLayout(c.device, &dl, nullptr, &c.setLayout), "vkCreateDescriptorSetLayout");
     VkPipelineLayoutCreateInfo pl{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO}; pl.setLayoutCount = 1; pl.pSetLayouts = &c.setLayout;
     require(vkCreatePipelineLayout(c.device, &pl, nullptr, &c.pipelineLayout), "vkCreatePipelineLayout");
 
-    VkShaderModule modules[4] = {makeModule(rgen), makeModule(miss), makeModule(shadowMiss), makeModule(chit)};
-    const VkShaderStageFlagBits stageBits[4] = {VK_SHADER_STAGE_RAYGEN_BIT_KHR, VK_SHADER_STAGE_MISS_BIT_KHR, VK_SHADER_STAGE_MISS_BIT_KHR, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR};
-    VkPipelineShaderStageCreateInfo stages[4]{};
-    for (int i = 0; i < 4; ++i) { stages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO; stages[i].stage = stageBits[i]; stages[i].module = modules[i]; stages[i].pName = "main"; }
+    VkShaderModule modules[5] = {makeModule(rgen), makeModule(miss), makeModule(shadowMiss), makeModule(chit), makeModule(ahit)};
+    const VkShaderStageFlagBits stageBits[5] = {VK_SHADER_STAGE_RAYGEN_BIT_KHR, VK_SHADER_STAGE_MISS_BIT_KHR, VK_SHADER_STAGE_MISS_BIT_KHR, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, VK_SHADER_STAGE_ANY_HIT_BIT_KHR};
+    VkPipelineShaderStageCreateInfo stages[5]{};
+    for (int i = 0; i < 5; ++i) { stages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO; stages[i].stage = stageBits[i]; stages[i].module = modules[i]; stages[i].pName = "main"; }
     VkRayTracingShaderGroupCreateInfoKHR groups[4]{};
     for (auto& g : groups) { g.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR; g.generalShader = g.closestHitShader = g.anyHitShader = g.intersectionShader = VK_SHADER_UNUSED_KHR; }
     groups[0].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR; groups[0].generalShader = 0;
     groups[1].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR; groups[1].generalShader = 1;
     groups[2].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR; groups[2].generalShader = 2;
-    groups[3].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR; groups[3].closestHitShader = 3;
-    VkRayTracingPipelineCreateInfoKHR ci{VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR}; ci.stageCount = 4; ci.pStages = stages;
+    groups[3].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR; groups[3].closestHitShader = 3; groups[3].anyHitShader = 4;
+    VkRayTracingPipelineCreateInfoKHR ci{VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR}; ci.stageCount = 5; ci.pStages = stages;
     ci.groupCount = 4; ci.pGroups = groups; ci.maxPipelineRayRecursionDepth = 1; ci.layout = c.pipelineLayout;
     VkResult pr = c.createPipelines(c.device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &ci, nullptr, &c.pipeline);
     for (auto m : modules) vkDestroyShaderModule(c.device, m, nullptr);
     require(pr, "vkCreateRayTracingPipelinesKHR");
 
-    VkDescriptorPoolSize sizes[4] = {{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 3}, {VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1},
-                                     {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}, {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4}};
-    VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO}; dp.maxSets = 1; dp.poolSizeCount = 4; dp.pPoolSizes = sizes;
+    VkDescriptorPoolSize sizes[5] = {{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 7}, {VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1},
+                                     {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}, {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4}, {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1}};
+    VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO}; dp.maxSets = 1; dp.poolSizeCount = 5; dp.pPoolSizes = sizes;
     require(vkCreateDescriptorPool(c.device, &dp, nullptr, &c.descPool), "vkCreateDescriptorPool");
     VkDescriptorSetAllocateInfo da{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO}; da.descriptorPool = c.descPool; da.descriptorSetCount = 1; da.pSetLayouts = &c.setLayout;
     require(vkAllocateDescriptorSets(c.device, &da, &c.set), "vkAllocateDescriptorSets");
@@ -359,46 +389,51 @@ void createPipeline(const std::vector<uint32_t>& rgen, const std::vector<uint32_
 }
 
 void writeDescriptors() {
-    VkDescriptorImageInfo imageInfo[3]{};
-    for (int i = 0; i < 3; ++i) { imageInfo[i].imageView = c.images[i].view; imageInfo[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL; }
+    VkDescriptorImageInfo imageInfo[7]{};
+    for (int i = 0; i < kImages; ++i) { imageInfo[i].imageView = c.images[i].view; imageInfo[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL; }
+    for (int i = 0; i < kHistory; ++i) { imageInfo[kImages + i].imageView = c.history[i].view; imageInfo[kImages + i].imageLayout = VK_IMAGE_LAYOUT_GENERAL; }
     VkWriteDescriptorSetAccelerationStructureKHR asw{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR};
     asw.accelerationStructureCount = 1; asw.pAccelerationStructures = &c.tlas.handle;
     VkDescriptorBufferInfo ubo{c.frameUbo.handle, 0, kFrameBytes};
     VkDescriptorBufferInfo ssbo[4] = {{c.verts[0].handle, 0, VK_WHOLE_SIZE}, {c.colors[0].handle, 0, VK_WHOLE_SIZE},
                                       {c.verts[1].handle, 0, VK_WHOLE_SIZE}, {c.colors[1].handle, 0, VK_WHOLE_SIZE}};
-    VkWriteDescriptorSet w[9]{};
-    for (int i = 0; i < 9; ++i) { w[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET; w[i].dstSet = c.set; w[i].dstBinding = i; w[i].descriptorCount = 1; }
+    VkDescriptorImageInfo atlasInfo{c.atlasSampler, c.atlasView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    VkWriteDescriptorSet w[14]{};
+    for (int i = 0; i < 14; ++i) { w[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET; w[i].dstSet = c.set; w[i].dstBinding = i; w[i].descriptorCount = 1; }
     for (int i = 0; i < 3; ++i) { w[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; w[i].pImageInfo = &imageInfo[i]; }
+    for (int i = 0; i < 4; ++i) { w[9 + i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; w[9 + i].pImageInfo = &imageInfo[3 + i]; }
     w[3].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR; w[3].pNext = &asw;
     w[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; w[4].pBufferInfo = &ubo;
     for (int i = 0; i < 4; ++i) { w[5 + i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; w[5 + i].pBufferInfo = &ssbo[i]; }
-    vkUpdateDescriptorSets(c.device, 9, w, 0, nullptr);
+    w[13].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; w[13].pImageInfo = &atlasInfo;
+    vkUpdateDescriptorSets(c.device, 14, w, 0, nullptr);
 }
 
 // A scene slot always contains at least one (tiny, far-away) triangle so every buffer and BLAS is valid.
-void buildSlot(int slot, const std::vector<float>& verticesIn, const std::vector<float>& colorsIn) {
+void buildSlot(int slot, const std::vector<float>& verticesIn, const std::vector<float>& colorsIn, uint32_t colorStride, bool opaque) {
     std::vector<float> vertices = verticesIn, colors = colorsIn;
-    if (vertices.size() < 9 || vertices.size() % 9 != 0 || colors.size() < (vertices.size() / 9) * 4) {
+    if (vertices.size() < 9 || vertices.size() % 9 != 0 || colors.size() < (vertices.size() / 9) * colorStride) {
         vertices = {0, -100000, 0, 0.01f, -100000, 0, 0, -100000, 0.01f};
-        colors = {0, 0, 0, 0};
+        colors.assign(colorStride, 0.0f);
+        if (colorStride == 12) colors[10] = 2.0f; // flat-colour flag
     }
     const uint32_t triangles = static_cast<uint32_t>(vertices.size() / 9);
     c.verts[slot] = uploadDeviceLocal(vertices.data(), vertices.size() * sizeof(float),
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR);
-    c.colors[slot] = uploadDeviceLocal(colors.data(), static_cast<VkDeviceSize>(triangles) * 4 * sizeof(float), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+    c.colors[slot] = uploadDeviceLocal(colors.data(), static_cast<VkDeviceSize>(triangles) * colorStride * sizeof(float), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
     VkAccelerationStructureGeometryTrianglesDataKHR tri{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR};
     tri.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT; tri.vertexData.deviceAddress = addressOf(c.verts[slot]); tri.vertexStride = 12;
     tri.maxVertex = triangles * 3 - 1; tri.indexType = VK_INDEX_TYPE_NONE_KHR;
     VkAccelerationStructureGeometryKHR geom{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR};
-    geom.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR; geom.flags = VK_GEOMETRY_OPAQUE_BIT_KHR; geom.geometry.triangles = tri;
+    geom.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR; geom.flags = opaque ? VK_GEOMETRY_OPAQUE_BIT_KHR : 0; geom.geometry.triangles = tri;
     c.blas[slot] = buildAccel(VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR, geom, triangles);
 }
 
 void buildScene(const std::vector<float>& sv, const std::vector<float>& sc, const std::vector<float>& wv, const std::vector<float>& wc) {
     vkDeviceWaitIdle(c.device);
     destroyGeometry();
-    buildSlot(0, sv, sc);
-    buildSlot(1, wv, wc);
+    buildSlot(0, sv, sc, 12, false); // block quads: any-hit alpha test
+    buildSlot(1, wv, wc, 4, true);
     VkAccelerationStructureInstanceKHR inst[2]{};
     for (int i = 0; i < 2; ++i) {
         inst[i].transform.matrix[0][0] = inst[i].transform.matrix[1][1] = inst[i].transform.matrix[2][2] = 1.0f;
@@ -417,6 +452,45 @@ void buildScene(const std::vector<float>& sv, const std::vector<float>& sc, cons
     if (c.imagesReady) writeDescriptors();
 }
 
+void createAtlasSampler() {
+    VkSamplerCreateInfo si{VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO}; si.magFilter = si.minFilter = VK_FILTER_NEAREST; si.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    si.addressModeU = si.addressModeV = si.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE; si.maxLod = 0.0f;
+    require(vkCreateSampler(c.device, &si, nullptr, &c.atlasSampler), "vkCreateSampler(atlas)");
+}
+
+// Uploads the block atlas (RGBA8, level 0). pixels == nullptr creates a 1x1 opaque white placeholder.
+void createAtlas(uint32_t width, uint32_t height, const uint8_t* pixels) {
+    vkDeviceWaitIdle(c.device);
+    destroyAtlas();
+    VkImageCreateInfo ci{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO}; ci.imageType = VK_IMAGE_TYPE_2D; ci.format = VK_FORMAT_R8G8B8A8_UNORM;
+    ci.extent = {width, height, 1}; ci.mipLevels = 1; ci.arrayLayers = 1; ci.samples = VK_SAMPLE_COUNT_1_BIT; ci.tiling = VK_IMAGE_TILING_OPTIMAL;
+    ci.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT; ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE; ci.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    require(vkCreateImage(c.device, &ci, nullptr, &c.atlasImage), "vkCreateImage(atlas)");
+    VkMemoryRequirements req{}; vkGetImageMemoryRequirements(c.device, c.atlasImage, &req);
+    VkMemoryAllocateInfo ai{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO}; ai.allocationSize = req.size; ai.memoryTypeIndex = memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    require(vkAllocateMemory(c.device, &ai, nullptr, &c.atlasMemory), "vkAllocateMemory(atlas)");
+    require(vkBindImageMemory(c.device, c.atlasImage, c.atlasMemory, 0), "vkBindImageMemory(atlas)");
+    VkImageViewCreateInfo vi{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO}; vi.image = c.atlasImage; vi.viewType = VK_IMAGE_VIEW_TYPE_2D; vi.format = VK_FORMAT_R8G8B8A8_UNORM;
+    vi.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    require(vkCreateImageView(c.device, &vi, nullptr, &c.atlasView), "vkCreateImageView(atlas)");
+    const VkDeviceSize bytes = static_cast<VkDeviceSize>(width) * height * 4;
+    Buffer staging = makeBuffer(bytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
+    if (pixels) std::memcpy(staging.mapped, pixels, bytes); else std::memset(staging.mapped, 255, bytes);
+    VkCommandBuffer cmd = beginOneShot();
+    VkImageMemoryBarrier toDst{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER}; toDst.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    toDst.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED; toDst.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    toDst.srcQueueFamilyIndex = toDst.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED; toDst.image = c.atlasImage; toDst.subresourceRange = vi.subresourceRange;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &toDst);
+    VkBufferImageCopy copy{}; copy.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1}; copy.imageExtent = {width, height, 1};
+    vkCmdCopyBufferToImage(cmd, staging.handle, c.atlasImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
+    VkImageMemoryBarrier toRead = toDst; toRead.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT; toRead.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    toRead.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL; toRead.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, 0, 0, nullptr, 0, nullptr, 1, &toRead);
+    endOneShot(cmd);
+    destroyBuffer(staging);
+    if (c.imagesReady && c.sceneReady) writeDescriptors();
+}
+
 void createImages(uint32_t width, uint32_t height) {
     vkDeviceWaitIdle(c.device);
     destroyImages();
@@ -425,7 +499,7 @@ void createImages(uint32_t width, uint32_t height) {
         VkExternalMemoryImageCreateInfo ext{VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO}; ext.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
         VkImageCreateInfo ci{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO}; ci.pNext = &ext; ci.imageType = VK_IMAGE_TYPE_2D; ci.format = kFormat;
         ci.extent = {width, height, 1}; ci.mipLevels = 1; ci.arrayLayers = 1; ci.samples = VK_SAMPLE_COUNT_1_BIT; ci.tiling = VK_IMAGE_TILING_OPTIMAL;
-        ci.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT; ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE; ci.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        ci.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT; ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE; ci.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         require(vkCreateImage(c.device, &ci, nullptr, &img.image), "vkCreateImage(RT output)");
         VkMemoryRequirements req{}; vkGetImageMemoryRequirements(c.device, img.image, &req); img.size = req.size;
         VkExportMemoryAllocateInfo exp{VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO}; exp.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
@@ -437,6 +511,20 @@ void createImages(uint32_t width, uint32_t height) {
         VkImageViewCreateInfo vi{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO}; vi.image = img.image; vi.viewType = VK_IMAGE_VIEW_TYPE_2D; vi.format = kFormat;
         vi.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
         require(vkCreateImageView(c.device, &vi, nullptr, &img.view), "vkCreateImageView(RT output)");
+    }
+    for (auto& img : c.history) {
+        VkImageCreateInfo ci{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO}; ci.imageType = VK_IMAGE_TYPE_2D; ci.format = kFormat;
+        ci.extent = {width, height, 1}; ci.mipLevels = 1; ci.arrayLayers = 1; ci.samples = VK_SAMPLE_COUNT_1_BIT; ci.tiling = VK_IMAGE_TILING_OPTIMAL;
+        ci.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT; ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE; ci.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        require(vkCreateImage(c.device, &ci, nullptr, &img.image), "vkCreateImage(RT history)");
+        VkMemoryRequirements req{}; vkGetImageMemoryRequirements(c.device, img.image, &req);
+        VkMemoryAllocateInfo ai{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO}; ai.allocationSize = req.size;
+        ai.memoryTypeIndex = memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        require(vkAllocateMemory(c.device, &ai, nullptr, &img.memory), "vkAllocateMemory(RT history)");
+        require(vkBindImageMemory(c.device, img.image, img.memory, 0), "vkBindImageMemory(RT history)");
+        VkImageViewCreateInfo vi{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO}; vi.image = img.image; vi.viewType = VK_IMAGE_VIEW_TYPE_2D; vi.format = kFormat;
+        vi.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+        require(vkCreateImageView(c.device, &vi, nullptr, &img.view), "vkCreateImageView(RT history)");
     }
     VkExportSemaphoreCreateInfo se{VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO}; se.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
     VkSemaphoreCreateInfo si{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO}; si.pNext = &se;
@@ -462,16 +550,18 @@ std::vector<float> readFloats(JNIEnv* env, jfloatArray array) {
 extern "C" {
 
 JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtInit(
-    JNIEnv* env, jclass, jbyteArray luidArray, jbyteArray rgen, jbyteArray miss, jbyteArray shadowMiss, jbyteArray chit) {
+    JNIEnv* env, jclass, jbyteArray luidArray, jbyteArray rgen, jbyteArray miss, jbyteArray shadowMiss, jbyteArray chit, jbyteArray ahit) {
 #ifdef _WIN32
     try {
         shutdown();
         if (!luidArray || env->GetArrayLength(luidArray) != VK_LUID_SIZE) throw std::runtime_error("OpenGL device LUID unavailable");
         std::array<uint8_t, VK_LUID_SIZE> luid{};
         env->GetByteArrayRegion(luidArray, 0, VK_LUID_SIZE, reinterpret_cast<jbyte*>(luid.data()));
-        auto r = readSpirv(env, rgen, "rt.rgen"), m = readSpirv(env, miss, "rt.rmiss"), s = readSpirv(env, shadowMiss, "rt_shadow.rmiss"), h = readSpirv(env, chit, "rt.rchit");
+        auto r = readSpirv(env, rgen, "rt.rgen"), m = readSpirv(env, miss, "rt.rmiss"), s = readSpirv(env, shadowMiss, "rt_shadow.rmiss"), h = readSpirv(env, chit, "rt.rchit"), ah = readSpirv(env, ahit, "rt.rahit");
         createDevice(luid.data());
-        createPipeline(r, m, s, h);
+        createAtlasSampler();
+        createAtlas(1, 1, nullptr);
+        createPipeline(r, m, s, h, ah);
         return JNI_TRUE;
     } catch (const std::exception& e) { shutdown(); throwJava(env, e.what()); return JNI_FALSE; }
 #else
@@ -525,7 +615,7 @@ JNIEXPORT jlongArray JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtConfigu
 #endif
 }
 
-// frame: 7 vec4 (see rt.rgen). glSignaled: OpenGL signalled the gl->vk semaphore since the previous trace.
+// frame: 11 vec4 (see rt.rgen). glSignaled: OpenGL signalled the gl->vk semaphore since the previous trace.
 JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtTrace(JNIEnv* env, jclass, jfloatArray frame, jboolean glSignaled) {
     try {
         if (!c.device || !c.sceneReady || !c.imagesReady) return JNI_FALSE;
@@ -535,12 +625,33 @@ JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtTrace(JNI
             if (w != VK_SUCCESS) throw std::runtime_error("Timed out waiting for the previous RT frame");
             vkResetFences(c.device, 1, &c.fence);
             c.fencePending = false;
+            if (c.queryPending) {
+                uint64_t stamps[2] = {0, 0};
+                if (vkGetQueryPoolResults(c.device, c.queryPool, 0, 2, sizeof(stamps), stamps, sizeof(uint64_t), VK_QUERY_RESULT_64_BIT) == VK_SUCCESS && stamps[1] >= stamps[0])
+                    c.lastMs = static_cast<float>(static_cast<double>(stamps[1] - stamps[0]) * c.timestampPeriod / 1.0e6);
+                c.queryPending = false;
+            }
         }
         env->GetFloatArrayRegion(frame, 0, static_cast<jsize>(kFrameBytes / sizeof(float)), static_cast<jfloat*>(c.frameUbo.mapped));
 
         vkResetCommandBuffer(c.cmd, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         require(vkBeginCommandBuffer(c.cmd, &bi), "vkBeginCommandBuffer(RT)");
+        vkCmdResetQueryPool(c.cmd, c.queryPool, 0, 2);
+        vkCmdWriteTimestamp(c.cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, c.queryPool, 0);
+        {
+            // Temporal history: first use moves it out of UNDEFINED; afterwards make last frame's copy visible.
+            VkImageMemoryBarrier hb[kHistory]{};
+            for (int i = 0; i < kHistory; ++i) {
+                hb[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                hb[i].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT; hb[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+                hb[i].oldLayout = c.historyInitialised ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_UNDEFINED; hb[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                hb[i].srcQueueFamilyIndex = hb[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                hb[i].image = c.history[i].image; hb[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+            }
+            vkCmdPipelineBarrier(c.cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, 0, 0, nullptr, 0, nullptr, kHistory, hb);
+            c.historyInitialised = true;
+        }
         VkImageMemoryBarrier acquire[kImages]{};
         for (int i = 0; i < kImages; ++i) {
             acquire[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER; acquire[i].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
@@ -552,14 +663,25 @@ JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtTrace(JNI
         vkCmdBindPipeline(c.cmd, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, c.pipeline);
         vkCmdBindDescriptorSets(c.cmd, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, c.pipelineLayout, 0, 1, &c.set, 0, nullptr);
         c.traceRays(c.cmd, &c.rgenRegion, &c.missRegion, &c.hitRegion, &c.callRegion, c.width, c.height, 1);
+        {
+            // Copy this frame's AO/GI (images 3 and 4) into the private history for the next frame.
+            VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+            mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT; mb.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+            vkCmdPipelineBarrier(c.cmd, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+            VkImageCopy region{}; region.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1}; region.dstSubresource = region.srcSubresource;
+            region.extent = {c.width, c.height, 1};
+            for (int i = 0; i < kHistory; ++i)
+                vkCmdCopyImage(c.cmd, c.images[3 + i].image, VK_IMAGE_LAYOUT_GENERAL, c.history[i].image, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
+            vkCmdWriteTimestamp(c.cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, c.queryPool, 1);
+        }
         VkImageMemoryBarrier release[kImages]{};
         for (int i = 0; i < kImages; ++i) {
-            release[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER; release[i].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT; release[i].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+            release[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER; release[i].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT; release[i].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
             release[i].oldLayout = VK_IMAGE_LAYOUT_GENERAL; release[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
             release[i].srcQueueFamilyIndex = c.queueFamily; release[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL;
             release[i].image = c.images[i].image; release[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
         }
-        vkCmdPipelineBarrier(c.cmd, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, kImages, release);
+        vkCmdPipelineBarrier(c.cmd, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR | VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, kImages, release);
         require(vkEndCommandBuffer(c.cmd), "vkEndCommandBuffer(RT)");
 
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
@@ -568,10 +690,24 @@ JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtTrace(JNI
         si.signalSemaphoreCount = 1; si.pSignalSemaphores = &c.semVkToGl;
         require(vkQueueSubmit(c.queue, 1, &si, c.fence), "vkQueueSubmit(RT)");
         c.fencePending = true;
+        c.queryPending = true;
+        return JNI_TRUE;
+    } catch (const std::exception& e) { throwJava(env, e.what()); return JNI_FALSE; }
+}
+
+JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtSetAtlas(JNIEnv* env, jclass, jobject pixels, jint width, jint height) {
+    try {
+        if (!c.device) throw std::runtime_error("RT renderer is not initialised");
+        if (width < 1 || height < 1 || width > 16384 || height > 16384) throw std::runtime_error("Unsupported atlas size");
+        const auto* data = static_cast<const uint8_t*>(env->GetDirectBufferAddress(pixels));
+        if (!data || env->GetDirectBufferCapacity(pixels) < static_cast<jlong>(width) * height * 4) throw std::runtime_error("Atlas buffer too small");
+        createAtlas(static_cast<uint32_t>(width), static_cast<uint32_t>(height), data);
         return JNI_TRUE;
     } catch (const std::exception& e) { throwJava(env, e.what()); return JNI_FALSE; }
 }
 
 JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtShutdown(JNIEnv*, jclass) { shutdown(); }
+
+JNIEXPORT jfloat JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtLastMs(JNIEnv*, jclass) { return c.lastMs; }
 
 } // extern "C"

@@ -32,7 +32,7 @@ public final class BlissRtPatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger("vialumix-shaderpack");
     public static final String SUFFIX = " (Vialumix RT)";
     /** Bump whenever the patch set changes so existing variants are regenerated. */
-    private static final int PATCH_VERSION = 2;
+    private static final int PATCH_VERSION = 4;
     private static final String STAMP = "shaders/.vialumix_rt_stamp";
     private static volatile float sunPathRotation = -35.0f;
 
@@ -155,11 +155,16 @@ public final class BlissRtPatcher {
         settings.replace("// #define Screen_Space_Reflections", "#define Screen_Space_Reflections");
         settings.replace("// #define Sky_reflection", "#define Sky_reflection");
         settings.replace("#define SSR_STEPS 30", "#define SSR_STEPS 16");
+        settings.replace("#define WAVY_PLANTS", "// #define WAVY_PLANTS (off: ray-traced geometry is static, waving would break depth matching)");
         settings.replace("#define SCREENSPACE_CONTACT_SHADOWS", "// #define SCREENSPACE_CONTACT_SHADOWS (replaced by Vialumix ray-traced shadows)");
         settings.replace("#define SHADER_VERSION_LABEL", "#define SHADER_VERSION_LABEL\n"
                 + "#define VIALUMIX_RT\n"
                 + "#define VLX_RT_RANGE 36.0 // blocks over which ray-traced shadows fade back to the shadow map\n"
-                + "#define VLX_RT_EMISSIVE 0.8 // brightness of emissive blocks seen in reflections");
+                + "#define VLX_RT_EMISSIVE 0.8 // brightness of emissive blocks seen in reflections\n"
+                + "#define VLX_RT_AO_CURVE 1.3 // contrast of ray-traced ambient occlusion\n"
+                + "#define VLX_RT_GI_STRENGTH 1.0 // strength of ray-traced one-bounce sunlight GI\n"
+                + "#define VLX_RT_EMISSIVE_GI 0.5 // light cast onto nearby surfaces by emissive blocks\n"
+                + "#define VLX_RT_GI_RANGE 34.0 // blocks over which ray-traced AO/GI fades back to Bliss SSAO");
         settings.save();
 
         Edit composite = edit(shaders.resolve("dimensions/composite1.fsh"), problems);
@@ -172,12 +177,32 @@ public final class BlissRtPatcher {
                 + "\t\t\t\tfloat vlxDist = length(feetPlayerPos);\n"
                 + "\t\t\t\tif (vlxMatches(vlxA.g, vlxDist) && !hand) {\n"
                 + "\t\t\t\t\tfloat vlxFade = 1.0 - smoothstep(VLX_RT_RANGE*0.6, VLX_RT_RANGE, vlxDist);\n"
-                + "\t\t\t\t\tShadows = mix(Shadows, min(Shadows, vlxA.r), vlxFade);\n"
+                + "\t\t\t\t\tShadows = mix(Shadows, vlxA.r, vlxFade);\n"
                 + "\t\t\t\t}\n"
                 + "\t\t\t}\n"
                 + "\t\t#endif");
         composite.replace("DoSpecularReflections(gl_FragData[0].rgb, viewPos, feetPlayerPos_normalized, WsunVec, specularNoises, normal, SpecularTex.r, SpecularTex.g, albedo, DirectLightColor*Shadows*NdotL, lightmap.y, hand);",
                 "DoSpecularReflections(gl_FragData[0].rgb, viewPos, feetPlayerPos_normalized, WsunVec, specularNoises, normal, SpecularTex.r, SpecularTex.g, albedo, DirectLightColor*Shadows*NdotL, lightmap.y, hand, texcoord/RENDER_SCALE, length(feetPlayerPos), DirectLightColor, AmbientLightColor);");
+
+        composite.replace("AO = vec3( min(vanillaAO_curve, SSAO_curve) );\n\t\t\tIndirect_lighting *= AO;",
+                "AO = vec3( min(vanillaAO_curve, SSAO_curve) );\n"
+                + "\t\t\tvec3 vlxGI = vec3(0.0);\n"
+                + "\t\t\t#ifdef VIALUMIX_RT\n"
+                + "\t\t\tif (!hand) {\n"
+                + "\t\t\t\tvec2 vlxUVg = texcoord/RENDER_SCALE;\n"
+                + "\t\t\t\tvec4 vlxAg = texture2D(vialumix_rt_a, vlxUVg);\n"
+                + "\t\t\t\tfloat vlxDg = length(feetPlayerPos);\n"
+                + "\t\t\t\tif (vlxMatches(vlxAg.g, vlxDg)) {\n"
+                + "\t\t\t\t\tvec4 vlxD = texture2D(vialumix_rt_d, vlxUVg);\n"
+                + "\t\t\t\t\tvec4 vlxE = texture2D(vialumix_rt_e, vlxUVg);\n"
+                + "\t\t\t\t\tfloat vlxFadeG = 1.0 - smoothstep(VLX_RT_GI_RANGE*0.6, VLX_RT_GI_RANGE, vlxDg);\n"
+                + "\t\t\t\t\tAO = vec3(mix(AO.x, pow(clamp(vlxD.a, 0.0, 1.0), VLX_RT_AO_CURVE), vlxFadeG));\n"
+                + "\t\t\t\t\tvlxGI = (DirectLightColor * vlxD.rgb + vlxE.rgb * VLX_RT_EMISSIVE_GI) * VLX_RT_GI_STRENGTH * vlxFadeG;\n"
+                + "\t\t\t\t}\n"
+                + "\t\t\t}\n"
+                + "\t\t\t#endif\n"
+                + "\t\t\tIndirect_lighting *= AO;\n"
+                + "\t\t\tIndirect_lighting += vlxGI;");
         composite.save();
 
         Edit specular = edit(shaders.resolve("lib/specular.glsl"), problems);
@@ -229,7 +254,11 @@ public final class BlissRtPatcher {
                 + "texture.composite.vialumix_rt_c = vialumix:rt_c\n"
                 + "texture.gbuffers.vialumix_rt_a = vialumix:rt_a\n"
                 + "texture.gbuffers.vialumix_rt_b = vialumix:rt_b\n"
-                + "texture.gbuffers.vialumix_rt_c = vialumix:rt_c\n");
+                + "texture.gbuffers.vialumix_rt_c = vialumix:rt_c\n"
+                + "texture.composite.vialumix_rt_d = vialumix:rt_d\n"
+                + "texture.composite.vialumix_rt_e = vialumix:rt_e\n"
+                + "texture.gbuffers.vialumix_rt_d = vialumix:rt_d\n"
+                + "texture.gbuffers.vialumix_rt_e = vialumix:rt_e\n");
         properties.save();
     }
 
@@ -282,7 +311,7 @@ public final class BlissRtPatcher {
             #ifdef VIALUMIX_RT
             uniform sampler2D vialumix_rt_a; // shadow, solid distance, water distance, flags (1 solid, 2 water, 4 reflection hit)
             uniform sampler2D vialumix_rt_b; // reflection hit albedo, hit
-            uniform sampler2D vialumix_rt_c; // sunlit, emissive, hit distance, sky visibility
+            uniform sampler2D vialumix_rt_c; // sunlit, emissive, hit distance, sky visibility\n            uniform sampler2D vialumix_rt_d; // sun bounce (rgb), ambient-occlusion visibility (a)\n            uniform sampler2D vialumix_rt_e; // emissive bounce (rgb), history distance (a)
 
             #ifdef OVERWORLD_SHADER
             	#define VLX_DIRECT (lightCol.rgb/80.0)

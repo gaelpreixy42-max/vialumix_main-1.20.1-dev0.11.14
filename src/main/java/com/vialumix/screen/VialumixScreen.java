@@ -83,8 +83,8 @@ public final class VialumixScreen extends Screen {
         addToggle(left, y, halfWidth, "vialumix.rt.shadows", () -> cfg.rayTracedShadows, v -> cfg.rayTracedShadows = v, true);
         addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.reflections", () -> cfg.rayTracedReflections, v -> cfg.rayTracedReflections = v, true);
         y += 31;
-        addToggle(left, y, halfWidth, "vialumix.rt.gi", () -> cfg.rayTracedGI, v -> cfg.rayTracedGI = v, false);
-        addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.ao", () -> cfg.rayTracedAO, v -> cfg.rayTracedAO = v, false);
+        addToggle(left, y, halfWidth, "vialumix.rt.gi", () -> cfg.rayTracedGI, v -> cfg.rayTracedGI = v, true);
+        addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.ao", () -> cfg.rayTracedAO, v -> cfg.rayTracedAO = v, true);
         y += 31;
         addToggle(left, y, halfWidth, "vialumix.rt.denoiser", () -> cfg.denoiser, v -> cfg.denoiser = v, false);
         addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.reconstruction", () -> cfg.rayReconstruction, v -> {

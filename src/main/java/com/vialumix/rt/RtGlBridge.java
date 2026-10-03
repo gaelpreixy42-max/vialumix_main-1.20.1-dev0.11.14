@@ -17,7 +17,7 @@ import java.nio.FloatBuffer;
  * to their own screen-space paths.
  */
 public final class RtGlBridge {
-    public static final int IMAGE_COUNT = 3;
+    public static final int IMAGE_COUNT = 5;
 
     private static final int[] textures = new int[IMAGE_COUNT];
     private static final int[] memoryObjects = new int[IMAGE_COUNT];
@@ -34,6 +34,12 @@ public final class RtGlBridge {
         if (ready && textures[index] != 0) return textures[index];
         if (fallbackTexture == 0) fallbackTexture = createFallback();
         return fallbackTexture;
+    }
+
+    private static int[] generalLayouts() {
+        int[] layouts = new int[IMAGE_COUNT];
+        java.util.Arrays.fill(layouts, EXTSemaphore.GL_LAYOUT_GENERAL_EXT);
+        return layouts;
     }
 
     public static boolean isReady() { return ready; }
@@ -84,14 +90,14 @@ public final class RtGlBridge {
     public static void waitForVulkan() {
         if (!ready) return;
         EXTSemaphore.glWaitSemaphoreEXT(semaphoreVkToGl, new int[0], textures,
-                new int[]{EXTSemaphore.GL_LAYOUT_GENERAL_EXT, EXTSemaphore.GL_LAYOUT_GENERAL_EXT, EXTSemaphore.GL_LAYOUT_GENERAL_EXT});
+                generalLayouts());
     }
 
     /** Releases the images back to Vulkan once OpenGL has finished sampling them. */
     public static void signalVulkan() {
         if (!ready) return;
         EXTSemaphore.glSignalSemaphoreEXT(semaphoreGlToVk, new int[0], textures,
-                new int[]{EXTSemaphore.GL_LAYOUT_GENERAL_EXT, EXTSemaphore.GL_LAYOUT_GENERAL_EXT, EXTSemaphore.GL_LAYOUT_GENERAL_EXT});
+                generalLayouts());
     }
 
     /** Debug helper: reads one RGBA texel of image {@code index}. Call between wait and signal. */

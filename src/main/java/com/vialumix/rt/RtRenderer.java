@@ -9,7 +9,16 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceType;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.system.MemoryUtil;
+import java.nio.ByteBuffer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -29,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class RtRenderer {
     private static final Logger LOGGER = LoggerFactory.getLogger("vialumix-rt");
-    private static final String[] TEXTURE_NAMES = {"rt_a", "rt_b", "rt_c"};
+    private static final String[] TEXTURE_NAMES = {"rt_a", "rt_b", "rt_c", "rt_d", "rt_e"};
     private static final float MAX_DISTANCE = 112.0f;
 
     private static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
@@ -57,12 +66,20 @@ public final class RtRenderer {
     private static int frameIndex;
     private static long lastLog;
     private static boolean wasActive;
+    // Previous camera (absolute world space, direction vectors pre-scaled by the half-FOV tangents) for temporal reprojection.
+    private static final float[] PREV_CAMERA = new float[12];
+    private static boolean hasPrevCamera;
+    private static final float[] PREV_FORWARD = new float[3];
 
     private RtRenderer() {}
 
     public static void register() {
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> registerTextures(client));
         ClientTickEvents.END_CLIENT_TICK.register(RtRenderer::tick);
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+             public Identifier getFabricId() { return new Identifier("vialumix", "rt_atlas"); }
+             public void reload(ResourceManager manager) { atlasDirty = true; atlasDelay = 20; }
+        });
         WorldRenderEvents.START.register(RtRenderer::frameStart);
         WorldRenderEvents.AFTER_ENTITIES.register(context -> afterEntities());
         WorldRenderEvents.END.register(context -> frameEnd(context));
@@ -85,6 +102,8 @@ public final class RtRenderer {
                 && VialumixNative.supportsRayTracing() && BlissRtPatcher.isRtPackActive();
     }
 
+    private static boolean atlasDirty = true;
+    private static int atlasDelay;
     private static boolean packChecked;
 
     /** Applies the generated RT variant of Bliss once when the saved config asks for ray tracing. */
@@ -154,6 +173,7 @@ public final class RtRenderer {
         try {
             if (!ensureNative(client)) return;
             ensureTargets(client);
+            uploadAtlasIfNeeded(client);
             uploadPendingScene();
             if (!sceneUploaded) return;
             float[] frame = frameParameters(client, context);
@@ -209,7 +229,7 @@ public final class RtRenderer {
             failed = true;
             return false;
         }
-        VialumixNative.rtInit(report.deviceLuid(), shader("rt.rgen"), shader("rt.rmiss"), shader("rt_shadow.rmiss"), shader("rt.rchit"));
+        VialumixNative.rtInit(report.deviceLuid(), shader("rt.rgen"), shader("rt.rmiss"), shader("rt_shadow.rmiss"), shader("rt.rchit"), shader("rt.rahit"));
         nativeReady = true;
         LOGGER.info("Vialumix RT bridge: Vulkan device created and ray-tracing pipeline compiled.");
         return true;
@@ -227,12 +247,36 @@ public final class RtRenderer {
         LOGGER.info("Vialumix RT bridge: shared RT images configured at {}x{} (RGBA16F x3).", w, h);
     }
 
+    /** Copies level 0 of the block atlas to Vulkan (once, and again after every resource reload). */
+    private static void uploadAtlasIfNeeded(MinecraftClient client) {
+        if (!atlasDirty) return;
+        if (atlasDelay > 0) { atlasDelay--; return; }
+        AbstractTexture texture = client.getTextureManager().getTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE);
+        int previous = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        ByteBuffer pixels = null;
+        try {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getGlId());
+            int w = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+            int h = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+            if (w <= 0 || h <= 0) { atlasDelay = 20; return; }
+            pixels = MemoryUtil.memAlloc(w * h * 4);
+            GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixels);
+            VialumixNative.rtSetAtlas(pixels, w, h);
+            atlasDirty = false;
+            uploadedHash = 0;
+            LOGGER.info("Vialumix RT bridge: block atlas {}x{} uploaded to Vulkan.", w, h);
+        } finally {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, previous);
+            if (pixels != null) MemoryUtil.memFree(pixels);
+        }
+    }
+
     private static void uploadPendingScene() {
         RtSceneBuilder.Snapshot next = PENDING.getAndSet(null);
         if (next == null) return;
         if (sceneUploaded && next.hash() == uploadedHash) return;
         long start = System.nanoTime();
-        VialumixNative.rtSetScene(next.solidVertices(), next.solidColors(), next.waterVertices(), next.waterColors());
+        VialumixNative.rtSetScene(next.solidVertices(), next.solidData(), next.waterVertices(), next.waterColors());
         scene = next;
         uploadedHash = next.hash();
         sceneUploaded = true;
@@ -257,7 +301,7 @@ public final class RtRenderer {
         boolean night = sun.y < 0.0f;
         if (night) sun.negate();
         VialumixConfig config = VialumixClient.config();
-        float[] f = new float[28];
+        float[] f = new float[44];
         f[0] = (float) (pos.x - scene.originX());
         f[1] = (float) (pos.y - scene.originY());
         f[2] = (float) (pos.z - scene.originZ());
@@ -272,6 +316,22 @@ public final class RtRenderer {
         f[23] = frameIndex++ & 0xFFFF;
         f[24] = client.player != null && client.player.isSubmergedInWater() ? 1.0f : 0.0f;
         f[25] = 1.0f;
+        boolean gi = config.rayTracedGI, ao = config.rayTracedAO;
+        f[26] = (gi || ao) ? 1.0f : 0.0f;
+        f[27] = (ao ? 1 : 0) + (gi ? 2 : 0);
+        // Previous camera, re-expressed relative to the current scene origin.
+        float[] cur = {(float) pos.x, (float) pos.y, (float) pos.z, 0f,
+                right.x * tanX, right.y * tanX, right.z * tanX, 0f,
+                up.x * tanY, up.y * tanY, up.z * tanY, 0f};
+        float[] prev = hasPrevCamera ? PREV_CAMERA : cur;
+        f[28] = prev[0] - scene.originX(); f[29] = prev[1] - scene.originY(); f[30] = prev[2] - scene.originZ();
+        f[32] = prev[4]; f[33] = prev[5]; f[34] = prev[6];
+        f[36] = prev[8]; f[37] = prev[9]; f[38] = prev[10];
+        float[] prevForward = hasPrevCamera ? PREV_FORWARD : new float[]{forward.x, forward.y, forward.z};
+        f[40] = prevForward[0]; f[41] = prevForward[1]; f[42] = prevForward[2];
+        System.arraycopy(cur, 0, PREV_CAMERA, 0, 12);
+        PREV_FORWARD[0] = forward.x; PREV_FORWARD[1] = forward.y; PREV_FORWARD[2] = forward.z;
+        hasPrevCamera = true;
         return f;
     }
 
@@ -301,8 +361,8 @@ public final class RtRenderer {
             if (client.crosshairTarget != null && client.crosshairTarget.getType() != net.minecraft.util.hit.HitResult.Type.MISS) {
                 crosshair = client.crosshairTarget.getPos().distanceTo(context.camera().getPos());
             }
-            LOGGER.info("RT center texel: shadow={} solidDist={} waterDist={} flags={} | crosshairDist={} | reflAlbedo=({}, {}, {}) hit={} | lit={} emissive={} sky={}",
-                    a[0], a[1], a[2], a[3], crosshair, b[0], b[1], b[2], b[3], c[0], c[1], c[3]);
+            LOGGER.info("RT gpu={} ms | RT center texel: shadow={} solidDist={} waterDist={} flags={} | crosshairDist={} | reflAlbedo=({}, {}, {}) hit={} | lit={} emissive={} sky={}",
+                    String.format("%.2f", VialumixNative.rtLastMs()), a[0], a[1], a[2], a[3], crosshair, b[0], b[1], b[2], b[3], c[0], c[1], c[3]);
         } catch (Throwable error) {
             LOGGER.warn("RT debug read failed: {}", error.toString());
             config.rtDebug = false;

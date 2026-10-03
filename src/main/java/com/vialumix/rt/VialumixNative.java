@@ -153,9 +153,9 @@ public final class VialumixNative {
     private static native long[] nativeRunRayTracingInterop(byte[] openGlDeviceLuid, byte[] raygen, byte[] miss, byte[] closestHit, float[] vertices);
     private static native void nativeDestroyRayTracingInterop();
     // ---- Persistent Iris bridge renderer (vulkan_rt_renderer.cpp) ----
-    public static boolean rtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit) {
+    public static boolean rtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit, byte[] anyHit) {
         if (!loaded) throw new IllegalStateException("Vialumix native Vulkan backend unavailable: " + loadError);
-        return nativeRtInit(luid, raygen, miss, shadowMiss, closestHit);
+        return nativeRtInit(luid, raygen, miss, shadowMiss, closestHit, anyHit);
     }
     public static boolean rtSetScene(float[] solidVerts, float[] solidColors, float[] waterVerts, float[] waterColors) {
         return nativeRtSetScene(solidVerts, solidColors, waterVerts, waterColors);
@@ -164,10 +164,14 @@ public final class VialumixNative {
     public static long[] rtConfigure(int width, int height) { return nativeRtConfigure(width, height); }
     public static boolean rtTrace(float[] frame, boolean glSignaled) { return nativeRtTrace(frame, glSignaled); }
     public static void rtShutdown() { if (loaded) nativeRtShutdown(); }
+    public static boolean rtSetAtlas(java.nio.ByteBuffer rgba, int width, int height) { return nativeRtSetAtlas(rgba, width, height); }
+    public static float rtLastMs() { return loaded ? nativeRtLastMs() : 0f; }
 
-    private static native boolean nativeRtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit);
+    private static native boolean nativeRtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit, byte[] anyHit);
+    private static native boolean nativeRtSetAtlas(java.nio.ByteBuffer rgba, int width, int height);
     private static native boolean nativeRtSetScene(float[] solidVerts, float[] solidColors, float[] waterVerts, float[] waterColors);
     private static native long[] nativeRtConfigure(int width, int height);
     private static native boolean nativeRtTrace(float[] frame, boolean glSignaled);
     private static native void nativeRtShutdown();
+    private static native float nativeRtLastMs();
 }
