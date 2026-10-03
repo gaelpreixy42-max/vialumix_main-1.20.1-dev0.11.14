@@ -106,10 +106,10 @@ JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeDestroyInteropI
 /*
  * Class:     com_vialumix_rt_VialumixNative
  * Method:    nativeRunRayTracingInterop
- * Signature: ([B[B[B[B)[J
+ * Signature: ([B[B[B[B[F)[J
  */
 JNIEXPORT jlongArray JNICALL Java_com_vialumix_rt_VialumixNative_nativeRunRayTracingInterop
-  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jfloatArray);
 
 /*
  * Class:     com_vialumix_rt_VialumixNative
