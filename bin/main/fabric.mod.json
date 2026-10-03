@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "vialumix",
+  "version": "${version}",
+  "name": "Vialumix",
+  "description": "Vialumix graphics pipeline for Minecraft 1.20.1: Iris shaders, ray tracing and optional DLSS integration.",
+  "authors": [
+    "Vialumix Project"
+  ],
+  "license": "GPL-3.0-or-later",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.vialumix.client.VialumixClient"
+    ],
+    "modmenu": [
+      "com.vialumix.modmenu.VialumixModMenu"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "vialumix.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "1.20.1",
+    "fabric-api": ">=0.92.12",
+    "sodium": ">=0.5.13",
+    "iris": ">=1.7.6"
+  },
+  "suggests": {
+    "fabric-language-kotlin": "*",
+    "modmenu": "*"
+  },
+  "icon": "assets/vialumix/icon.png",
+  "custom": {
+    "modmenu": {
+      "update_checker": false
+    }
+  }
+}

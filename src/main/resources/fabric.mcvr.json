@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "vialumix",
+  "version": "${version}",
+  "name": "Vialumix (MCVR Ray Tracing Test)",
+  "description": "Isolated Vialumix build using Radiance/MCVR for Vulkan ray-traced rendering.",
+  "authors": ["Vialumix Project"],
+  "license": "GPL-3.0-or-later",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.vialumix.client.VialumixClient"],
+    "modmenu": ["com.vialumix.modmenu.VialumixModMenu"]
+  },
+  "mixins": [
+    { "config": "vialumix.mixins.json", "environment": "client" }
+  ],
+  "jars": [
+    { "file": "Radiance-0.1.6-alpha-fabric-1.20.1-windows.jar" }
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "1.20.1",
+    "fabric-api": ">=0.92.12"
+  },
+  "breaks": {
+    "sodium": "*",
+    "iris": "*"
+  },
+  "suggests": {
+    "fabric-language-kotlin": "*",
+    "modmenu": "*"
+  },
+  "icon": "assets/vialumix/icon.png",
+  "custom": {
+    "modmenu": { "update_checker": false }
+  }
+}

@@ -4,10 +4,14 @@ import com.vialumix.config.VialumixConfig;
 import com.vialumix.rt.VialumixNative;
 import com.vialumix.rt.RadianceRayTracingBridge;
 import com.vialumix.rt.OpenGLRayTracingProbe;
+import com.vialumix.rt.RayTracingWorldCapture;
+import com.vialumix.rt.VulkanOpenGLImageInteropProbe;
+import com.vialumix.rt.VialumixRayTracingDebugOverlay;
 import com.vialumix.shader.ShaderpackManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
