@@ -68,7 +68,9 @@ public final class VulkanOpenGLImageInteropProbe {
             byte[] rgba = new byte[pixels.capacity()];
             pixels.position(0);
             pixels.get(rgba);
-            VialumixRayTracingDebugOverlay.show(rgba, width, height, sceneVertices.length / 9);
+            if (sceneVertices.length > 9) {
+                VialumixRayTracingDebugOverlay.show(rgba, width, height, sceneVertices.length / 9);
+            }
             return "hardwareRayTracingPipeline=true, inputTriangles=" + (sceneVertices.length / 9)
                     + ", rayHitSamples=" + hitPixels + ", centerPixel=" + red + "/" + green + "/" + blue + "/" + alpha
                     + ", dimensions=" + width + "x" + height;
