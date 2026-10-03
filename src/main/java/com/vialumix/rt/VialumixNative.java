@@ -75,9 +75,9 @@ public final class VialumixNative {
         return nativeCreateInteropImage(openGlDeviceLuid);
     }
 
-    public static long[] runRayTracingInterop(byte[] openGlDeviceLuid, byte[] raygen, byte[] miss, byte[] closestHit) {
+    public static long[] runRayTracingInterop(byte[] openGlDeviceLuid, byte[] raygen, byte[] miss, byte[] closestHit, float[] vertices) {
         if (!loaded) throw new IllegalStateException("Vialumix native Vulkan probe unavailable: " + loadError);
-        return nativeRunRayTracingInterop(openGlDeviceLuid, raygen, miss, closestHit);
+        return nativeRunRayTracingInterop(openGlDeviceLuid, raygen, miss, closestHit, vertices);
     }
 
     public static void closeInteropHandle(long handle) { nativeCloseInteropHandle(handle); }
@@ -136,6 +136,6 @@ public final class VialumixNative {
     private static native long[] nativeCreateInteropImage(byte[] openGlDeviceLuid);
     private static native void nativeCloseInteropHandle(long handle);
     private static native void nativeDestroyInteropImage();
-    private static native long[] nativeRunRayTracingInterop(byte[] openGlDeviceLuid, byte[] raygen, byte[] miss, byte[] closestHit);
+    private static native long[] nativeRunRayTracingInterop(byte[] openGlDeviceLuid, byte[] raygen, byte[] miss, byte[] closestHit, float[] vertices);
     private static native void nativeDestroyRayTracingInterop();
 }

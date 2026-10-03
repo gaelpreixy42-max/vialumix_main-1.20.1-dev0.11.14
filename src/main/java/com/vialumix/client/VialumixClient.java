@@ -65,6 +65,34 @@ public final class VialumixClient implements ClientModInitializer {
             }
         });
 
+        ClientTickEvents.END_CLIENT_TICK.register(new ClientTickEvents.EndTick() {
+            private int warmupTicks;
+            private boolean captured;
+
+            @Override
+            public void onEndTick(MinecraftClient client) {
+                if (captured || client.world == null || client.player == null) return;
+                if (++warmupTicks < 40) return;
+                captured = true;
+                try {
+                    RayTracingWorldCapture.Scene scene = RayTracingWorldCapture.capture(client);
+                    LOGGER.info("Vialumix RT world capture: {} opaque block triangles in a {}-block radius and {} vertical-block window.",
+                            scene.triangles(), 24, 32);
+                    if (scene.triangles() == 0) {
+                        LOGGER.warn("Vialumix RT world capture found no opaque block geometry; no world ray dispatch was run.");
+                        return;
+                    }
+                    OpenGLRayTracingProbe.Report report = OpenGLRayTracingProbe.inspectCurrentContext();
+                    String result = VulkanOpenGLImageInteropProbe.run(report.deviceLuid(), scene.vertices());
+                    LOGGER.info("Vialumix RT loaded-world dispatch: {}", result);
+                    client.player.sendMessage(Text.literal("Vialumix RT test: " + scene.triangles()
+                            + " triangles, " + result), true);
+                } catch (Throwable error) {
+                    LOGGER.error("Vialumix could not capture or ray trace the loaded Minecraft block scene", error);
+                }
+            }
+        });
+
         if (VialumixNative.isRadianceBackendAvailable()) {
             // Radiance owns the Vulkan renderer in this artifact. Select its built-in RT pack
             // once the client has entered a world and Radiance has populated the pipeline modules.
