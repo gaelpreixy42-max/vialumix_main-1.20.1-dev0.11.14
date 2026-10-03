@@ -11,7 +11,7 @@ import com.vialumix.shader.ShaderpackManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
@@ -38,6 +38,8 @@ public final class VialumixClient implements ClientModInitializer {
         shaderpacks = new ShaderpackManager(root.resolve("shaderpacks"));
         shaderpacks.scan();
         VialumixNative.initialize(root.resolve("vialumix"));
+        HudRenderCallback.EVENT.register((drawContext, tickDelta) ->
+                VialumixRayTracingDebugOverlay.render(drawContext, MinecraftClient.getInstance()));
 
         ClientTickEvents.END_CLIENT_TICK.register(new ClientTickEvents.EndTick() {
             private boolean logged;
