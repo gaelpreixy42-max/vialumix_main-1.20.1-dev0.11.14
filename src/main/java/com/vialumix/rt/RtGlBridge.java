@@ -108,6 +108,24 @@ public final class RtGlBridge {
         return new float[]{buffer.get(0), buffer.get(1), buffer.get(2), buffer.get(3)};
     }
 
+    /** Debug: fraction of pixels whose alpha (or flag) channel is positive, for image { index}, plus mean RGB. */
+    public static float[] imageStats(int index, boolean useFlags) {
+        if (!ready) return null;
+        java.nio.FloatBuffer buffer = org.lwjgl.BufferUtils.createFloatBuffer(width * height * 4);
+        int previous = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textures[index]);
+        GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_FLOAT, buffer);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, previous);
+        long positive = 0; double r = 0, g = 0, b = 0;
+        int pixels = width * height;
+        for (int i = 0; i < pixels; i++) {
+            float a = buffer.get(i * 4 + 3);
+            if (a > 0.0f) positive++;
+            r += buffer.get(i * 4); g += buffer.get(i * 4 + 1); b += buffer.get(i * 4 + 2);
+        }
+        return new float[]{(float) positive / pixels, (float) (r / pixels), (float) (g / pixels), (float) (b / pixels)};
+    }
+
     public static void release() {
         ready = false;
         for (int i = 0; i < IMAGE_COUNT; i++) {

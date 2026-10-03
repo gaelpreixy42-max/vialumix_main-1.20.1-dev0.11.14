@@ -183,7 +183,7 @@ public final class RtRenderer {
         RtSections.tick(client, radiusChunks);
     }
 
-    private static long framesSeen, framesTraced;
+    private static long framesSeen, framesTraced, compositesDrawn;
 
     private static void frameStart(WorldRenderContext context) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -237,6 +237,7 @@ public final class RtRenderer {
         if (!tracedThisFrame || !nativeFrame || failed) return;
         if (!waitedThisFrame) afterEntities();
         try {
+            compositesDrawn++;
             RtComposite.draw(RtGlBridge.textureId(5), lastTanX, lastTanY, lastP22, lastP32, radiusBlocks * 0.86f, radiusBlocks * 0.98f, 1.0f);
         } catch (Throwable error) {
             failed = true;
@@ -434,13 +435,15 @@ public final class RtRenderer {
             if (client.crosshairTarget != null && client.crosshairTarget.getType() != net.minecraft.util.hit.HitResult.Type.MISS) {
                 crosshair = client.crosshairTarget.getPos().distanceTo(context.camera().getPos());
             }
+            StringBuilder all = new StringBuilder();\n            for (int im = 0; im < 6; im++) { float[] s = RtGlBridge.imageStats(im, false); all.append(" ").append((char) ('A' + im)).append("[a>0=").append(String.format("%.3f", s == null ? -1 : s[0])).append(" rgb=").append(s == null ? 0 : String.format("%.3f,%.3f,%.3f", s[1], s[2], s[3])).append("]"); }\n            LOGGER.info("RT all images:{}", all);\n            float[] fa = RtGlBridge.imageStats(0, true), ff = RtGlBridge.imageStats(5, false);
+            LOGGER.info("RT image stats: A.flags>0 {} | F.dist>0 {} (mean rgb {}, {}, {})", fa == null ? -1 : fa[0], ff == null ? -1 : ff[0], ff == null ? 0 : ff[1], ff == null ? 0 : ff[2], ff == null ? 0 : ff[3]);
             Vec3d dbgPos = context.camera().getPos();
             LOGGER.info("RT cam=({}, {}, {}) yaw={} origin=({}, {}, {}) basisFwd=({}, {}, {}) player=({}, {}, {})",
                     String.format("%.1f", dbgPos.x), String.format("%.1f", dbgPos.y), String.format("%.1f", dbgPos.z), String.format("%.1f", context.camera().getYaw()),
                     originX, originY, originZ, lastForward[0], lastForward[1], lastForward[2],
                     String.format("%.1f", client.player.getX()), String.format("%.1f", client.player.getY()), String.format("%.1f", client.player.getZ()));
-            LOGGER.info("RT frames traced {}/{} | RT gpu={} ms, {} sections | RT center texel: shadow={} solidDist={} waterDist={} flags={} | crosshairDist={} | reflAlbedo=({}, {}, {}) hit={} | lit={} emissive={} sky={}",
-                    framesTraced, framesSeen, String.format("%.2f", VialumixNative.rtLastMs()), VialumixNative.rtSectionCount(), a[0], a[1], a[2], a[3], crosshair, b[0], b[1], b[2], b[3], c[0], c[1], c[3]);
+            LOGGER.info("RT composites drawn {} (traced {}, frames {}) | RT gpu={} ms, {} sections | RT center texel: shadow={} solidDist={} waterDist={} flags={} | crosshairDist={} | reflAlbedo=({}, {}, {}) hit={} | lit={} emissive={} sky={}",
+                    compositesDrawn, framesTraced, framesSeen, String.format("%.2f", VialumixNative.rtLastMs()), VialumixNative.rtSectionCount(), a[0], a[1], a[2], a[3], crosshair, b[0], b[1], b[2], b[3], c[0], c[1], c[3]);
         } catch (Throwable error) {
             LOGGER.warn("RT debug read failed: {}", error.toString());
             config.rtDebug = false;
