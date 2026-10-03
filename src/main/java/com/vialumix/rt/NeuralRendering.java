@@ -13,7 +13,8 @@ import java.util.regex.Pattern;
  * GPU are present; the preferences in the Neural Rendering menu are stored until then.
  */
 public final class NeuralRendering {
-    public static final String PLUGIN = "sl.dlss_nr.dll";
+    /** NGX runtime of the neural-rendering feature ("DLSSNR"), as referenced by community tools; or the Streamline plugin. */
+    public static final String[] PLUGINS = {"nvngx_dlssnr.dll", "sl.dlss_nr.dll"};
     private static final Pattern RTX_50 = Pattern.compile("RTX\\s*50\\d{2}", Pattern.CASE_INSENSITIVE);
 
     public enum Status { READY, GPU_UNSUPPORTED, PLUGIN_MISSING }
@@ -23,7 +24,10 @@ public final class NeuralRendering {
     public static boolean pluginInstalled() {
         Path root = VialumixNative.runtimeDirectory();
         if (root == null) return false;
-        return Files.isRegularFile(root.resolve(PLUGIN)) || Files.isRegularFile(root.resolve("streamline").resolve(PLUGIN));
+        for (String name : PLUGINS) {
+            if (Files.isRegularFile(root.resolve(name)) || Files.isRegularFile(root.resolve("streamline").resolve(name))) return true;
+        }
+        return false;
     }
 
     /** Must be called on the render thread (reads the OpenGL renderer string). */
