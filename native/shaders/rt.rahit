@@ -1,0 +1,17 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+
+hitAttributeEXT vec2 attribs;
+layout(set = 0, binding = 6, std430) readonly buffer SolidData { vec4 data[]; } solidD;
+layout(set = 0, binding = 13) uniform sampler2D atlas;
+
+// Alpha test against the block atlas so leaves, grass, glass panes ... cast and receive correct rays.
+void main() {
+    if (gl_InstanceCustomIndexEXT == 1) return;
+    uint prim = uint(gl_PrimitiveID);
+    vec4 d0 = solidD.data[prim * 3u], d1 = solidD.data[prim * 3u + 1u], d2 = solidD.data[prim * 3u + 2u];
+    if (d2.z > 1.5) return;
+    vec3 w = vec3(1.0 - attribs.x - attribs.y, attribs.x, attribs.y);
+    vec2 uv = d0.xy * w.x + d0.zw * w.y + d1.xy * w.z;
+    if (textureLod(atlas, uv, 0.0).a < 0.5) ignoreIntersectionEXT;
+}
