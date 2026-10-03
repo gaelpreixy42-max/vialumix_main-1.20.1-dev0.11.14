@@ -1,0 +1,128 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+
+layout(set = 0, binding = 0, rgba16f) uniform writeonly image2D outA; // shadow, solidDist, waterDist, flags
+layout(set = 0, binding = 1, rgba16f) uniform writeonly image2D outB; // reflection hit albedo, hit
+layout(set = 0, binding = 2, rgba16f) uniform writeonly image2D outC; // sunlit, emissive, hitDist, skyVisibility
+layout(set = 0, binding = 3) uniform accelerationStructureEXT tlas;
+layout(set = 0, binding = 4, std140) uniform Frame {
+    vec4 camPos;      // xyz scene-relative camera, w = time (s)
+    vec4 camRight;    // xyz right * tanHalfFovX, w = origin X (absolute world)
+    vec4 camUp;       // xyz up * tanHalfFovY,    w = origin Y
+    vec4 camForward;  // xyz forward,             w = origin Z
+    vec4 sunDir;      // xyz towards light, w = soft shadow cone radius
+    vec4 misc;        // x reflections, y shadows, z max distance, w frame index
+    vec4 flags;       // x camera in water, y wave strength
+} f;
+
+struct Hit { float t; vec3 n; vec3 albedo; float emissive; };
+layout(location = 0) rayPayloadEXT Hit hit;
+layout(location = 1) rayPayloadEXT float visibility;
+
+float ign(vec2 p, float frame) {
+    p += 5.588238 * frame;
+    return fract(52.9829189 * fract(0.06711056 * p.x + 0.00583715 * p.y));
+}
+
+vec3 coneSample(vec3 dir, float radius, vec2 xi) {
+    vec3 up = abs(dir.y) < 0.99 ? vec3(0, 1, 0) : vec3(1, 0, 0);
+    vec3 t = normalize(cross(up, dir));
+    vec3 b = cross(dir, t);
+    float a = 6.2831853 * xi.x;
+    float r = sqrt(xi.y) * radius;
+    return normalize(dir + t * (cos(a) * r) + b * (sin(a) * r));
+}
+
+vec3 cosineSample(vec3 n, vec2 xi) {
+    vec3 up = abs(n.y) < 0.99 ? vec3(0, 1, 0) : vec3(1, 0, 0);
+    vec3 t = normalize(cross(up, n));
+    vec3 b = cross(n, t);
+    float a = 6.2831853 * xi.x;
+    float r = sqrt(xi.y);
+    return normalize(t * (cos(a) * r) + b * (sin(a) * r) + n * sqrt(max(1.0 - xi.y, 0.0)));
+}
+
+float traceVisibility(vec3 origin, vec3 direction, float tMax) {
+    visibility = 0.0;
+    traceRayEXT(tlas,
+                gl_RayFlagsOpaqueEXT | gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsSkipClosestHitShaderEXT,
+                0x01, 0, 0, 1, origin, 0.0, direction, tMax, 1);
+    return visibility;
+}
+
+vec3 waveNormal(vec2 p, float t, float strength) {
+    vec2 g = vec2(0.0);
+    float a;
+    a = p.x * 1.31 + p.y * 0.77 + t * 1.10; g += vec2(1.31, 0.77) * cos(a) * 0.050;
+    a = p.x * -0.83 + p.y * 1.57 + t * 0.85; g += vec2(-0.83, 1.57) * cos(a) * 0.040;
+    a = p.x * 2.90 + p.y * -2.10 + t * 1.90; g += vec2(2.90, -2.10) * cos(a) * 0.016;
+    a = p.x * -3.70 + p.y * -2.60 + t * 2.30; g += vec2(-3.70, -2.60) * cos(a) * 0.010;
+    return normalize(vec3(-g.x * strength, 1.0, -g.y * strength));
+}
+
+void main() {
+    ivec2 px = ivec2(gl_LaunchIDEXT.xy);
+    vec2 size = vec2(gl_LaunchSizeEXT.xy);
+    vec2 ndc = (vec2(px) + 0.5) / size * 2.0 - 1.0;
+    vec3 org = f.camPos.xyz;
+    vec3 dir = normalize(f.camForward.xyz + f.camRight.xyz * ndc.x + f.camUp.xyz * ndc.y);
+    float maxD = f.misc.z;
+    float frame = f.misc.w;
+    vec2 xi0 = vec2(ign(vec2(px), frame), ign(vec2(px) + vec2(31.7, 11.3), frame));
+    vec2 xi1 = vec2(ign(vec2(px) + vec2(7.1, 53.9), frame), ign(vec2(px) + vec2(91.3, 3.7), frame));
+
+    // Primary opaque surface (everything except water).
+    hit.t = -1.0;
+    traceRayEXT(tlas, gl_RayFlagsOpaqueEXT, 0x01, 0, 0, 0, org, 0.0, dir, maxD, 0);
+    Hit solid = hit;
+
+    // Water surface in front of the opaque surface.
+    Hit water; water.t = -1.0; water.n = vec3(0, 1, 0); water.albedo = vec3(0); water.emissive = 0.0;
+    if (f.flags.x < 0.5) {
+        hit.t = -1.0;
+        float limit = solid.t > 0.0 ? solid.t : maxD;
+        traceRayEXT(tlas, gl_RayFlagsOpaqueEXT, 0x02, 0, 0, 0, org, 0.0, dir, limit, 0);
+        water = hit;
+    }
+
+    float shadow = 1.0;
+    if (solid.t > 0.0 && f.misc.y > 0.5) {
+        vec3 p = org + dir * solid.t + solid.n * 0.004;
+        vec3 l0 = coneSample(f.sunDir.xyz, f.sunDir.w, xi0);
+        vec3 l1 = coneSample(f.sunDir.xyz, f.sunDir.w, vec2(fract(xi0.x + 0.5), fract(xi0.y + 0.5)));
+        shadow = 0.5 * (traceVisibility(p, l0, 512.0) + traceVisibility(p, l1, 512.0));
+    }
+
+    float flagBits = 0.0;
+    if (solid.t > 0.0) flagBits += 1.0;
+    if (water.t > 0.0) flagBits += 2.0;
+
+    vec4 reflB = vec4(0.0);
+    vec4 reflC = vec4(0.0);
+    bool hasPrimary = (water.t > 0.0) || (solid.t > 0.0);
+    if (f.misc.x > 0.5 && hasPrimary) {
+        bool isWater = water.t > 0.0;
+        float t0 = isWater ? water.t : solid.t;
+        vec3 n = isWater ? waveNormal((org + dir * t0).xz + vec2(f.camRight.w, f.camForward.w), f.camPos.w, f.flags.y) : solid.n;
+        if (dot(n, dir) > 0.0) n = -n;
+        vec3 origin = org + dir * t0 + n * 0.004;
+        vec3 r = reflect(dir, n);
+        if (r.y < -0.2 && isWater) r.y = -r.y; // water never reflects the ground below it
+        hit.t = -1.0;
+        traceRayEXT(tlas, gl_RayFlagsOpaqueEXT, 0x01, 0, 0, 0, origin, 0.0, r, maxD, 0);
+        if (hit.t > 0.0) {
+            vec3 hp = origin + r * hit.t + hit.n * 0.004;
+            float ndl = max(dot(hit.n, f.sunDir.xyz), 0.0);
+            float lit = 0.0;
+            if (ndl > 0.0 && f.misc.y > 0.5) lit = ndl * traceVisibility(hp, coneSample(f.sunDir.xyz, f.sunDir.w, xi1), 512.0);
+            float sky = traceVisibility(hp, cosineSample(hit.n, xi0.yx), 64.0);
+            reflB = vec4(hit.albedo, 1.0);
+            reflC = vec4(lit, hit.emissive, hit.t, sky);
+            flagBits += 4.0;
+        }
+    }
+
+    imageStore(outA, px, vec4(shadow, max(solid.t, 0.0), max(water.t, 0.0), flagBits));
+    imageStore(outB, px, reflB);
+    imageStore(outC, px, reflC);
+}
