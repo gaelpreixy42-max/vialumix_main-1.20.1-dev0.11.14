@@ -435,7 +435,10 @@ public final class RtRenderer {
             if (client.crosshairTarget != null && client.crosshairTarget.getType() != net.minecraft.util.hit.HitResult.Type.MISS) {
                 crosshair = client.crosshairTarget.getPos().distanceTo(context.camera().getPos());
             }
-            StringBuilder all = new StringBuilder();\n            for (int im = 0; im < 6; im++) { float[] s = RtGlBridge.imageStats(im, false); all.append(" ").append((char) ('A' + im)).append("[a>0=").append(String.format("%.3f", s == null ? -1 : s[0])).append(" rgb=").append(s == null ? 0 : String.format("%.3f,%.3f,%.3f", s[1], s[2], s[3])).append("]"); }\n            LOGGER.info("RT all images:{}", all);\n            float[] fa = RtGlBridge.imageStats(0, true), ff = RtGlBridge.imageStats(5, false);
+            StringBuilder all = new StringBuilder();
+            for (int im = 0; im < 6; im++) { float[] s = RtGlBridge.imageStats(im, false); all.append(" ").append((char) ('A' + im)).append("[a>0=").append(String.format("%.3f", s == null ? -1 : s[0])).append(" rgb=").append(s == null ? 0 : String.format("%.3f,%.3f,%.3f", s[1], s[2], s[3])).append("]"); }
+            LOGGER.info("RT all images:{}", all);
+            float[] fa = RtGlBridge.imageStats(0, true), ff = RtGlBridge.imageStats(5, false);
             LOGGER.info("RT image stats: A.flags>0 {} | F.dist>0 {} (mean rgb {}, {}, {})", fa == null ? -1 : fa[0], ff == null ? -1 : ff[0], ff == null ? 0 : ff[1], ff == null ? 0 : ff[2], ff == null ? 0 : ff[3]);
             Vec3d dbgPos = context.camera().getPos();
             LOGGER.info("RT cam=({}, {}, {}) yaw={} origin=({}, {}, {}) basisFwd=({}, {}, {}) player=({}, {}, {})",

@@ -375,6 +375,8 @@ void createPipeline(const std::vector<uint32_t>& rgen, const std::vector<uint32_
     b[3].binding = 3; b[3].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR; b[3].descriptorCount = 1; b[3].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
     b[4].binding = 4; b[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; b[4].descriptorCount = 1; b[4].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
     b[5].binding = 5; b[5].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; b[5].descriptorCount = 1; b[5].stageFlags = rt;
+    // Unused slots must still carry their own (unique) binding number, otherwise they alias binding 0.
+    for (int i = 6; i < 9; ++i) { b[i].binding = i; b[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; b[i].descriptorCount = 0; b[i].stageFlags = rt; }
     for (int i = 9; i < 13; ++i) { b[i].binding = i; b[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; b[i].descriptorCount = 1; b[i].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR; }
     VkDescriptorSetLayoutCreateInfo dl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO}; b[13].binding = 13; b[13].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; b[13].descriptorCount = 1; b[13].stageFlags = rt;
     b[14].binding = 14; b[14].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; b[14].descriptorCount = 1; b[14].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
