@@ -103,6 +103,22 @@ JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeCloseInteropHan
 JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeDestroyInteropImage
   (JNIEnv *, jclass);
 
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRunRayTracingInterop
+ * Signature: ([B[B[B[B)[J
+ */
+JNIEXPORT jlongArray JNICALL Java_com_vialumix_rt_VialumixNative_nativeRunRayTracingInterop
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeDestroyRayTracingInterop
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeDestroyRayTracingInterop
+  (JNIEnv *, jclass);
+
 #ifdef __cplusplus
 }
 #endif

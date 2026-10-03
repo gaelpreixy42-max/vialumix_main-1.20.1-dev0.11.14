@@ -75,8 +75,14 @@ public final class VialumixNative {
         return nativeCreateInteropImage(openGlDeviceLuid);
     }
 
+    public static long[] runRayTracingInterop(byte[] openGlDeviceLuid, byte[] raygen, byte[] miss, byte[] closestHit) {
+        if (!loaded) throw new IllegalStateException("Vialumix native Vulkan probe unavailable: " + loadError);
+        return nativeRunRayTracingInterop(openGlDeviceLuid, raygen, miss, closestHit);
+    }
+
     public static void closeInteropHandle(long handle) { nativeCloseInteropHandle(handle); }
     public static void destroyInteropImage() { if (loaded) nativeDestroyInteropImage(); }
+    public static void destroyRayTracingInterop() { if (loaded) nativeDestroyRayTracingInterop(); }
 
     /** True only for the dedicated artifact that includes Radiance/MCVR. */
     public static boolean isRadianceBackendAvailable() {
@@ -130,4 +136,6 @@ public final class VialumixNative {
     private static native long[] nativeCreateInteropImage(byte[] openGlDeviceLuid);
     private static native void nativeCloseInteropHandle(long handle);
     private static native void nativeDestroyInteropImage();
+    private static native long[] nativeRunRayTracingInterop(byte[] openGlDeviceLuid, byte[] raygen, byte[] miss, byte[] closestHit);
+    private static native void nativeDestroyRayTracingInterop();
 }

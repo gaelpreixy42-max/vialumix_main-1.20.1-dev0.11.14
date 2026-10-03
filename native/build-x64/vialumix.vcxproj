@@ -376,6 +376,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\src\vialumix_jni.cpp" />
     <ClCompile Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\src\vulkan_gl_interop_probe.cpp" />
     <ClCompile Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\src\vulkan_gl_image_probe.cpp" />
+    <ClCompile Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\src\vulkan_rt_triangle_probe.cpp" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
