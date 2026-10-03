@@ -18,7 +18,6 @@ public final class VialumixScreen extends Screen {
     private ButtonWidget resolutionButton;
     private ButtonWidget renderDistanceButton;
     private ButtonWidget graphicsQualityButton;
-    private ButtonWidget dlssButton;
 
     public VialumixScreen(Screen parent) {
         super(Text.translatable("vialumix.title"));
@@ -96,30 +95,10 @@ public final class VialumixScreen extends Screen {
         }, false);
         y += 31;
 
-        dlssButton = addDrawableChild(ButtonWidget.builder(
-                Text.translatable("vialumix.upscaler").append(": ").append(upscalerText()),
-                b -> cycleUpscaler()
-        ).dimensions(left, y + 6, panelWidth, 24).build());
-        if (VialumixNative.isRadianceBackendAvailable()) dlssButton.active = false;
-        y += 37;
-
-        ButtonWidget dlssQualityButton = addDrawableChild(ButtonWidget.builder(Text.translatable("vialumix.dlss.quality").append(": ").append(cfg.dlssQuality), b -> cycleDlssQuality())
-                .dimensions(left, y, panelWidth, 24).build());
-        if (VialumixNative.isRadianceBackendAvailable()) dlssQualityButton.active = false;
-        y += 31;
-
-        CyclingButtonWidget<Boolean> frameGenerationButton = addDrawableChild(CyclingButtonWidget.onOffBuilder()
-                .initially(cfg.frameGeneration)
-                .build(left, y, panelWidth, 24, Text.translatable("vialumix.frame_generation"), (b, value) -> {
-                    if (value && !VialumixNative.supportsFrameGeneration()) {
-                        VialumixClient.notify("vialumix.dlss.fg_missing");
-                        b.setValue(false);
-                        return;
-                    }
-                    cfg.frameGeneration = value;
-                }));
-        if (VialumixNative.isRadianceBackendAvailable()) frameGenerationButton.active = false;
-        y += 40;
+        // DLSS / neural rendering options live on their own screen.
+        addDrawableChild(ButtonWidget.builder(Text.translatable("vialumix.neural.open"),
+                b -> client.setScreen(new NeuralRenderingScreen(this, cfg))).dimensions(left, y + 6, panelWidth, 24).build());
+        y += 46;
 
         addDrawableChild(ButtonWidget.builder(Text.translatable("vialumix.apply"), b -> applyAndClose())
                 .dimensions(left, y, (panelWidth - 8) / 2, 24).build());
@@ -262,27 +241,6 @@ public final class VialumixScreen extends Screen {
 
     private void updateShaderButton() {
         shaderButton.setMessage(Text.translatable("vialumix.shaderpack").append(": ").append(VialumixClient.shaderpacks().displayName(cfg.shaderpack)));
-    }
-
-    private void cycleUpscaler() {
-        cfg.upscaler = switch (cfg.upscaler) {
-            case "native" -> VialumixNative.hasDlssRuntime() ? "dlss" : "fsr";
-            case "dlss" -> "fsr";
-            case "fsr" -> "xess";
-            default -> "native";
-        };
-        dlssButton.setMessage(Text.translatable("vialumix.upscaler").append(": ").append(upscalerText()));
-    }
-
-    private Text upscalerText() { return Text.translatable("vialumix.upscaler." + cfg.upscaler); }
-
-    private void cycleDlssQuality() {
-        cfg.dlssQuality = switch (cfg.dlssQuality) {
-            case "quality" -> "balanced";
-            case "balanced" -> "performance";
-            case "performance" -> "ultra_performance";
-            default -> "quality";
-        };
     }
 
     @Override

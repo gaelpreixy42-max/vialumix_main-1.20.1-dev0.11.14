@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  */
 public final class NeuralRendering {
     public static final String PLUGIN = "sl.dlss_nr.dll";
-    private static final Pattern RTX_50 = Pattern.compile("RTX\s*50\d{2}", Pattern.CASE_INSENSITIVE);
+    private static final Pattern RTX_50 = Pattern.compile("RTX\\s*50\\d{2}", Pattern.CASE_INSENSITIVE);
 
     public enum Status { READY, GPU_UNSUPPORTED, PLUGIN_MISSING }
 

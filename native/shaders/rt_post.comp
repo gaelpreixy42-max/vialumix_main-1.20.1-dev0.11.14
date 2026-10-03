@@ -1,0 +1,67 @@
+#version 450
+
+layout(local_size_x = 8, local_size_y = 8) in;
+
+layout(set = 0, binding = 0, rgba16f) uniform readonly image2D rawImg;   // this frame's noisy colour (rgb) + primary distance (a)
+layout(set = 0, binding = 1) uniform sampler2D histTex;                  // previous resolved colour (rgb) + its distance (a)
+layout(set = 0, binding = 2, rgba16f) uniform writeonly image2D outImg;  // resolved colour, exported to OpenGL
+layout(set = 0, binding = 3, std140) uniform Frame {
+    vec4 camPos; vec4 camRight; vec4 camUp; vec4 camForward;
+    vec4 sunDir; vec4 misc; vec4 flags;
+    vec4 prevPos; vec4 prevRight; vec4 prevUp; vec4 prevForward;
+    vec4 skyColor; vec4 sunColor; vec4 skyHorizon;
+} f;
+
+vec3 toTone(vec3 x) { return x / (1.0 + x); }
+vec3 fromTone(vec3 y) { return y / max(vec3(1.0) - y, vec3(1e-3)); }
+
+void main() {
+    ivec2 px = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 size = imageSize(rawImg);
+    if (px.x >= size.x || px.y >= size.y) return;
+    vec4 c0 = imageLoad(rawImg, px);
+    if (!(c0.a > 0.0)) { imageStore(outImg, px, vec4(0.0)); return; }
+
+    // Neighbourhood statistics in tonemapped space (robust against fireflies).
+    vec3 t0 = toTone(c0.rgb);
+    vec3 mean = vec3(0.0), sq = vec3(0.0), neighbourMax = vec3(0.0);
+    float n = 0.0;
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            vec4 s = imageLoad(rawImg, clamp(px + ivec2(dx, dy), ivec2(0), size - 1));
+            if (!(s.a > 0.0)) continue;
+            vec3 t = toTone(s.rgb);
+            mean += t; sq += t * t; n += 1.0;
+            if (dx != 0 || dy != 0) neighbourMax = max(neighbourMax, t);
+        }
+    }
+    t0 = min(t0, neighbourMax * 1.2 + 0.04); // suppress single-pixel fireflies before they enter the history
+    mean /= n; vec3 sigma = sqrt(max(sq / n - mean * mean, vec3(0.0)));
+    vec3 lo = mean - sigma * 1.6, hi = mean + sigma * 1.6;
+
+    // Reproject this surface point into the previous frame.
+    vec2 ndc = (vec2(px) + 0.5) / vec2(size) * 2.0 - 1.0;
+    vec3 dir = normalize(f.camForward.xyz + f.camRight.xyz * ndc.x + f.camUp.xyz * ndc.y);
+    vec3 world = f.camPos.xyz + dir * c0.a;
+    vec3 rel = world - f.prevPos.xyz;
+    float depthPrev = dot(rel, f.prevForward.xyz);
+    float alpha = 1.0;
+    float outDist = c0.a;
+    vec3 resolved = t0;
+    if (depthPrev > 0.01 && f.misc.w > 0.5) {
+        vec2 ndcPrev = vec2(dot(rel, f.prevRight.xyz) / (dot(f.prevRight.xyz, f.prevRight.xyz) * depthPrev),
+                            dot(rel, f.prevUp.xyz) / (dot(f.prevUp.xyz, f.prevUp.xyz) * depthPrev));
+        vec2 uvPrev = ndcPrev * 0.5 + 0.5;
+        if (all(greaterThan(uvPrev, vec2(0.0))) && all(lessThan(uvPrev, vec2(1.0)))) {
+            vec4 h = texture(histTex, uvPrev);
+            float expected = length(rel);
+            if (h.a > 0.0 && abs(h.a - expected) < max(0.2, 0.05 * expected)) {
+                vec3 hist = clamp(toTone(h.rgb), lo, hi);
+                alpha = 0.07;
+                resolved = mix(hist, t0, alpha);
+                outDist = mix(h.a, c0.a, alpha); // keep the distance stable too: it drives the composite fade and depth
+            }
+        }
+    }
+    imageStore(outImg, px, vec4(fromTone(clamp(resolved, vec3(0.0), vec3(0.999))), outDist));
+}

@@ -56,6 +56,7 @@ public final class AutoTest {
             });
         }
         ticks++;
+        if (System.getenv("VIALUMIX_AUTOTEST_UI") != null) { uiTick(client); return; }
         if (ticks < WAIT) return; // let chunks load and the RT scene build
         if (moving) { moveTick(client); return; }
         if (view < 0) { view = 0; viewTicks = 0; teleport(client, VIEWS[0]); return; }
@@ -79,6 +80,26 @@ public final class AutoTest {
             var server = client.getServer();
             server.getCommandManager().executeWithPrefix(server.getCommandSource(), command);
         });
+    }
+
+    private static int uiTicks;
+
+    /** UI test: captures the Vialumix settings screens (main, neural rendering, shaderpack list). */
+    private static void uiTick(MinecraftClient client) {
+        uiTicks++;
+        if (uiTicks == 60) client.setScreen(new com.vialumix.screen.VialumixScreen(null));
+        if (uiTicks == 90) screenshotNamed(client, "ui_main");
+        if (uiTicks == 100) {
+            var cfg = com.vialumix.client.VialumixClient.config().copy();
+            client.setScreen(new com.vialumix.screen.NeuralRenderingScreen(null, cfg));
+        }
+        if (uiTicks == 130) screenshotNamed(client, "ui_neural");
+        if (uiTicks == 140) {
+            com.vialumix.client.VialumixClient.shaderpacks().scan();
+            client.setScreen(new com.vialumix.screen.ShaderpackSelectionScreen(null, "", s -> { }));
+        }
+        if (uiTicks == 170) screenshotNamed(client, "ui_shaders");
+        if (uiTicks > 180) { LOGGER.info("Vialumix UI test finished."); client.scheduleStop(); }
     }
 
     private static boolean moving;
