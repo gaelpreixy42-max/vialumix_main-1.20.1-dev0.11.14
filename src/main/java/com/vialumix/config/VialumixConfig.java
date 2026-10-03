@@ -22,6 +22,15 @@ public final class VialumixConfig {
     public String upscaler = "native";
     public String dlssQuality = "quality";
     public boolean frameGeneration = false;
+
+    /** DLSS 5 "3D-guided neural rendering" preferences (applied only when NVIDIA's plugin is installed). */
+    public boolean neuralRendering = false;
+    /** auto | quality | balanced | fast (model selection exposed by the DLSS 5 SDK). */
+    public String neuralModel = "auto";
+    public int neuralStructureIntensity = 50;
+    public int neuralToneIntensity = 50;
+    public boolean neuralSemanticMask = true;
+    public boolean neuralEngineMask = false;
     /** Vialumix RT bridge: fraction of the framebuffer size used for the Vulkan RT images (0.25 - 1.0). */
     public float rtResolutionScale = 1.0f;
     /** Optional cap on the ray-tracing world radius in chunks (0 = follow the vanilla render distance). */
@@ -55,6 +64,12 @@ public final class VialumixConfig {
         upscaler = other.upscaler;
         dlssQuality = other.dlssQuality;
         frameGeneration = other.frameGeneration;
+        neuralRendering = other.neuralRendering;
+        neuralModel = other.neuralModel;
+        neuralStructureIntensity = other.neuralStructureIntensity;
+        neuralToneIntensity = other.neuralToneIntensity;
+        neuralSemanticMask = other.neuralSemanticMask;
+        neuralEngineMask = other.neuralEngineMask;
         rtResolutionScale = other.rtResolutionScale;
         rtDistanceLimit = other.rtDistanceLimit;
         rtDebug = other.rtDebug;
