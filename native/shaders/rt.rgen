@@ -7,6 +7,7 @@ layout(set = 0, binding = 2, rgba16f) uniform writeonly image2D outC; // sunlit,
 layout(set = 0, binding = 3) uniform accelerationStructureEXT tlas;
 layout(set = 0, binding = 9, rgba16f) uniform writeonly image2D outD;  // sun bounce (rgb), AO visibility (a)
 layout(set = 0, binding = 10, rgba16f) uniform writeonly image2D outE; // emissive bounce (rgb), history distance (a)
+layout(set = 0, binding = 14, rgba16f) uniform writeonly image2D outF; // native mode: final lit colour (rgb), primary distance (a)
 layout(set = 0, binding = 11, rgba16f) uniform readonly image2D histD;
 layout(set = 0, binding = 12, rgba16f) uniform readonly image2D histE;
 layout(set = 0, binding = 4, std140) uniform Frame {
@@ -21,11 +22,37 @@ layout(set = 0, binding = 4, std140) uniform Frame {
     vec4 prevRight;   // previous right * tanHalfFovX
     vec4 prevUp;      // previous up * tanHalfFovY
     vec4 prevForward;
+    vec4 skyColor;    // rgb sky radiance, w = native lighting mode flag
+    vec4 sunColor;    // rgb sun irradiance, w = emissive scale
+    vec4 skyHorizon;  // rgb horizon sky radiance
 } f;
 
 struct Hit { float t; vec3 n; vec3 albedo; float emissive; };
 layout(location = 0) rayPayloadEXT Hit hit;
 layout(location = 1) rayPayloadEXT float visibility;
+
+// Sky radiance seen along direction d (zenith/horizon gradient, soft sun glow, dim ground bounce below the horizon).
+vec3 skyRadiance(vec3 d, float rough) {
+    float h = clamp(d.y, 0.0, 1.0);
+    vec3 sky = mix(f.skyHorizon.rgb, f.skyColor.rgb, pow(h, 0.45));
+    sky = d.y < 0.0 ? f.skyHorizon.rgb * mix(0.55, 0.25, clamp(-d.y * 2.0, 0.0, 1.0)) : sky;
+    float s = max(dot(d, f.sunDir.xyz), 0.0);
+    float e = mix(600.0, 40.0, rough);
+    return sky + f.sunColor.rgb * (pow(s, 24.0) * 0.012 + pow(s, e) * 1.5 * (e + 2.0) / 602.0);
+}
+
+// Diffuse sky (no sun disc): what bounce rays see. The sun is handled by explicit shadow rays, so sampling it here would only add fireflies.
+vec3 skyDiffuse(vec3 d) {
+    float h = clamp(d.y, 0.0, 1.0);
+    vec3 sky = mix(f.skyHorizon.rgb, f.skyColor.rgb, pow(h, 0.45));
+    return d.y < 0.0 ? f.skyHorizon.rgb * mix(0.55, 0.25, clamp(-d.y * 2.0, 0.0, 1.0)) : sky;
+}
+
+float halton(uint index, uint base) {
+    float result = 0.0, fraction = 1.0 / float(base);
+    while (index > 0u) { result += fraction * float(index % base); index /= base; fraction /= float(base); }
+    return result;
+}
 
 float ign(vec2 p, float frame) {
     p += 5.588238 * frame;
@@ -58,20 +85,31 @@ float traceVisibility(vec3 origin, vec3 direction, float tMax) {
     return visibility;
 }
 
-vec3 waveNormal(vec2 p, float t, float strength) {
+// Animated water normal. Each wave octave fades out once a pixel's footprint on the water becomes comparable to its
+// wavelength (finer ripples than a pixel only alias into moire rings and shimmer); `footprint` is in blocks.
+vec3 waveNormal(vec2 p, float t, float strength, float footprint) {
     vec2 g = vec2(0.0);
-    float a;
-    a = p.x * 1.31 + p.y * 0.77 + t * 1.10; g += vec2(1.31, 0.77) * cos(a) * 0.050;
-    a = p.x * -0.83 + p.y * 1.57 + t * 0.85; g += vec2(-0.83, 1.57) * cos(a) * 0.040;
-    a = p.x * 2.90 + p.y * -2.10 + t * 1.90; g += vec2(2.90, -2.10) * cos(a) * 0.016;
-    a = p.x * -3.70 + p.y * -2.60 + t * 2.30; g += vec2(-3.70, -2.60) * cos(a) * 0.010;
+    float a, w;
+    a = p.x * 1.31 + p.y * 0.77 + t * 1.10;  w = 1.0 - smoothstep(0.6, 2.2, footprint); g += vec2(1.31, 0.77) * cos(a) * 0.050 * w;
+    a = p.x * -0.83 + p.y * 1.57 + t * 0.85; w = 1.0 - smoothstep(0.7, 2.6, footprint); g += vec2(-0.83, 1.57) * cos(a) * 0.040 * w;
+    a = p.x * 2.90 + p.y * -2.10 + t * 1.90; w = 1.0 - smoothstep(0.25, 1.0, footprint); g += vec2(2.90, -2.10) * cos(a) * 0.016 * w;
+    a = p.x * -3.70 + p.y * -2.60 + t * 2.30; w = 1.0 - smoothstep(0.15, 0.6, footprint); g += vec2(-3.70, -2.60) * cos(a) * 0.010 * w;
     return normalize(vec3(-g.x * strength, 1.0, -g.y * strength));
+}
+
+// Ground footprint (blocks) of one pixel for a primary ray hitting a horizontal surface at distance t.
+float pixelFootprint(float t, vec3 dir) {
+    float pixelAngle = 2.0 * length(f.camUp.xyz) / float(gl_LaunchSizeEXT.y);
+    return t * pixelAngle / max(abs(dir.y), 0.02);
 }
 
 void main() {
     ivec2 px = ivec2(gl_LaunchIDEXT.xy);
     vec2 size = vec2(gl_LaunchSizeEXT.xy);
-    vec2 ndc = (vec2(px) + 0.5) / size * 2.0 - 1.0;
+    // Sub-pixel jitter (native mode only) so the temporal pass anti-aliases edges.
+    vec2 jitter = f.skyColor.w > 0.5 ? vec2(halton((uint(f.misc.w) & 15u) + 1u, 2u), halton((uint(f.misc.w) & 15u) + 1u, 3u)) - 0.5 : vec2(0.0);
+    jitter *= 0.5;
+    vec2 ndc = (vec2(px) + 0.5 + jitter) / size * 2.0 - 1.0;
     vec3 org = f.camPos.xyz;
     vec3 dir = normalize(f.camForward.xyz + f.camRight.xyz * ndc.x + f.camUp.xyz * ndc.y);
     float maxD = f.misc.z;
@@ -122,6 +160,7 @@ void main() {
                 histValid = hE.a > 0.0 && abs(hE.a - expected) < max(0.12, 0.03 * expected);
             }
         }
+        bool nat = f.skyColor.w > 0.5;
         bool doTrace = !histValid || ((px.x & 1) + 2 * (px.y & 1)) == (int(frame) & 3);
         if (doTrace) {
             vec3 acc = vec3(0.0), emi = vec3(0.0);
@@ -135,17 +174,23 @@ void main() {
                 traceRayEXT(tlas, gl_RayFlagsNoneEXT, 0x01, 0, 0, 0, go, 0.0, gd, 40.0, 0);
                 if (hit.t < 0.0) {
                     ao += 1.0;
+                    if (nat) acc += min(skyDiffuse(gd), vec3(4.0));
                 } else {
                     ao += clamp(hit.t / 5.0, 0.0, 1.0);
                     vec3 hp = go + gd * hit.t + hit.n * 0.004;
                     float ndl = max(dot(hit.n, f.sunDir.xyz), 0.0);
                     float lit = 0.0;
                     if (ndl > 0.0 && f.misc.y > 0.5) lit = ndl * traceVisibility(hp, coneSample(f.sunDir.xyz, f.sunDir.w, xi.yx), 512.0);
-                    acc += hit.albedo * lit;
-                    emi += hit.albedo * hit.emissive;
+                    if (nat) {
+                        acc += min(hit.albedo * (lit * f.sunColor.rgb + f.skyColor.rgb * 0.10), vec3(8.0));
+                        emi += hit.albedo * hit.emissive * f.sunColor.w;
+                    } else {
+                        acc += hit.albedo * lit;
+                        emi += hit.albedo * hit.emissive;
+                    }
                 }
             }
-            int mask = int(f.flags.w + 0.5); // bit0 = AO, bit1 = GI
+            int mask = nat ? 3 : int(f.flags.w + 0.5); // bit0 = AO, bit1 = GI
             vec4 newD = vec4(((mask & 2) != 0 ? acc : vec3(0.0)) / float(RAYS), (mask & 1) != 0 ? ao / float(RAYS) : 1.0);
             vec4 newE = vec4(((mask & 2) != 0 ? emi : vec3(0.0)) / float(RAYS), 0.0);
             float w = histValid ? 0.30 : 1.0;
@@ -168,7 +213,7 @@ void main() {
     if (f.misc.x > 0.5 && hasPrimary) {
         bool isWater = water.t > 0.0;
         float t0 = isWater ? water.t : solid.t;
-        vec3 n = isWater ? waveNormal((org + dir * t0).xz + vec2(f.camRight.w, f.camForward.w), f.camPos.w, f.flags.y) : solid.n;
+        vec3 n = isWater ? waveNormal((org + dir * t0).xz + vec2(f.camRight.w, f.camForward.w), f.camPos.w, f.flags.y, pixelFootprint(t0, dir)) : solid.n;
         if (dot(n, dir) > 0.0) n = -n;
         vec3 origin = org + dir * t0 + n * 0.004;
         vec3 r = reflect(dir, n);
@@ -187,6 +232,42 @@ void main() {
         }
     }
 
+    // ---- Native (shaderpack-less) lighting: the RT result is the final image ----
+    vec4 nativeOut = vec4(0.0);
+    if (f.skyColor.w > 0.5) {
+        vec3 sunC = f.sunColor.rgb, skyC = f.skyColor.rgb;
+        vec3 solidCol = vec3(0.0);
+        if (solid.t > 0.0) {
+            float ndl = max(dot(solid.n, f.sunDir.xyz), 0.0);
+            solidCol = solid.albedo * (sunC * ndl * shadow + giD.rgb + giE.rgb) + solid.albedo * solid.emissive * f.sunColor.w;
+        }
+        if (water.t > 0.0) {
+            vec3 wn = waveNormal((org + dir * water.t).xz + vec2(f.camRight.w, f.camForward.w), f.camPos.w, f.flags.y * 0.45, pixelFootprint(water.t, dir));
+            if (dot(wn, dir) > 0.0) wn = -wn;
+            vec3 r = normalize(reflect(dir, wn));
+            r.y = max(r.y, 0.01);
+            vec3 reflCol = reflB.a > 0.5
+                ? reflB.rgb * (reflC.r * sunC + skyC * 0.30) + reflB.rgb * reflC.g * f.sunColor.w
+                : skyRadiance(r, smoothstep(15.0, 120.0, water.t));
+            float fres = 0.02 + 0.98 * pow(1.0 - clamp(dot(-dir, wn), 0.0, 1.0), 5.0);
+            float depthW = solid.t > 0.0 ? max(solid.t - water.t, 0.0) : 40.0;
+            vec3 sigma = vec3(0.95, 0.30, 0.17);
+            vec3 trans = exp(-sigma * depthW);
+            vec3 under = solid.t > 0.0 ? solidCol * trans * trans : vec3(0.0); // light is absorbed on the way in and on the way out
+            vec3 scatter = vec3(0.03, 0.22, 0.30) * (skyC * 0.45 + sunC * 0.04 * max(f.sunDir.y, 0.1)) * (1.0 - exp(-0.22 * depthW));
+            nativeOut = vec4(mix(under + scatter, reflCol, fres), water.t);
+        } else if (solid.t > 0.0) {
+            nativeOut = vec4(solidCol, solid.t);
+        }
+        if (nativeOut.a > 0.0) {
+            // Aerial perspective toward the horizon sky colour.
+            float fog = 1.0 - exp(-nativeOut.a * 0.0011);
+            nativeOut.rgb = mix(nativeOut.rgb, f.skyHorizon.rgb * 1.1, fog);
+            float sceneRadius = (f.misc.z - 24.0) / 1.08;
+            nativeOut.rgb = mix(nativeOut.rgb, f.skyHorizon.rgb * 1.1, smoothstep(sceneRadius * 0.5, sceneRadius * 0.98, nativeOut.a));
+        }
+    }
+    imageStore(outF, px, nativeOut);
     imageStore(outA, px, vec4(shadow, max(solid.t, 0.0), max(water.t, 0.0), flagBits));
     imageStore(outB, px, reflB);
     imageStore(outC, px, reflC);

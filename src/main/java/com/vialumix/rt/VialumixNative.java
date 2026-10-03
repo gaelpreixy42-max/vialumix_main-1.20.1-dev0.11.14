@@ -153,25 +153,34 @@ public final class VialumixNative {
     private static native long[] nativeRunRayTracingInterop(byte[] openGlDeviceLuid, byte[] raygen, byte[] miss, byte[] closestHit, float[] vertices);
     private static native void nativeDestroyRayTracingInterop();
     // ---- Persistent Iris bridge renderer (vulkan_rt_renderer.cpp) ----
-    public static boolean rtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit, byte[] anyHit) {
+    public static boolean rtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit, byte[] anyHit, byte[] post) {
         if (!loaded) throw new IllegalStateException("Vialumix native Vulkan backend unavailable: " + loadError);
-        return nativeRtInit(luid, raygen, miss, shadowMiss, closestHit, anyHit);
+        return nativeRtInit(luid, raygen, miss, shadowMiss, closestHit, anyHit, post);
     }
-    public static boolean rtSetScene(float[] solidVerts, float[] solidColors, float[] waterVerts, float[] waterColors) {
-        return nativeRtSetScene(solidVerts, solidColors, waterVerts, waterColors);
+    /** Uploads (or replaces) a batch of section meshes with one GPU submission. kind 0 = block quads (12 data floats/tri), 1 = water (4). */
+    public static void rtSectionUploadBatch(int[] slots, int[] kinds, int[] positions, float[][] verts, float[][] data) {
+        nativeRtSectionUploadBatch(slots, kinds, positions, verts, data);
     }
+    public static void rtSectionRemove(int slot) { if (loaded) nativeRtSectionRemove(slot); }
+    public static void rtClearSections() { if (loaded) nativeRtClearSections(); }
+    public static int rtSectionCount() { return loaded ? nativeRtSectionCount() : 0; }
     /** Returns {width, height, vk->gl semaphore, gl->vk semaphore, (memoryHandle, size) x3}. */
     public static long[] rtConfigure(int width, int height) { return nativeRtConfigure(width, height); }
-    public static boolean rtTrace(float[] frame, boolean glSignaled) { return nativeRtTrace(frame, glSignaled); }
+    public static boolean rtTrace(float[] frame, boolean glSignaled, int originX, int originY, int originZ) {
+        return nativeRtTrace(frame, glSignaled, originX, originY, originZ);
+    }
     public static void rtShutdown() { if (loaded) nativeRtShutdown(); }
     public static boolean rtSetAtlas(java.nio.ByteBuffer rgba, int width, int height) { return nativeRtSetAtlas(rgba, width, height); }
     public static float rtLastMs() { return loaded ? nativeRtLastMs() : 0f; }
 
-    private static native boolean nativeRtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit, byte[] anyHit);
+    private static native boolean nativeRtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit, byte[] anyHit, byte[] post);
     private static native boolean nativeRtSetAtlas(java.nio.ByteBuffer rgba, int width, int height);
-    private static native boolean nativeRtSetScene(float[] solidVerts, float[] solidColors, float[] waterVerts, float[] waterColors);
+    private static native boolean nativeRtSectionUploadBatch(int[] slots, int[] kinds, int[] positions, float[][] verts, float[][] data);
+    private static native void nativeRtSectionRemove(int slot);
+    private static native void nativeRtClearSections();
+    private static native int nativeRtSectionCount();
     private static native long[] nativeRtConfigure(int width, int height);
-    private static native boolean nativeRtTrace(float[] frame, boolean glSignaled);
+    private static native boolean nativeRtTrace(float[] frame, boolean glSignaled, int originX, int originY, int originZ);
     private static native void nativeRtShutdown();
     private static native float nativeRtLastMs();
 }

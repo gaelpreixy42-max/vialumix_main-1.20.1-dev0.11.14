@@ -24,6 +24,8 @@ public final class VialumixConfig {
     public boolean frameGeneration = false;
     /** Vialumix RT bridge: fraction of the framebuffer size used for the Vulkan RT images (0.25 - 1.0). */
     public float rtResolutionScale = 1.0f;
+    /** Optional cap on the ray-tracing world radius in chunks (0 = follow the vanilla render distance). */
+    public int rtDistanceLimit = 0;
     /** Logs the centre RT texel against the crosshair distance every few seconds. */
     public boolean rtDebug = false;
 
@@ -54,6 +56,7 @@ public final class VialumixConfig {
         dlssQuality = other.dlssQuality;
         frameGeneration = other.frameGeneration;
         rtResolutionScale = other.rtResolutionScale;
+        rtDistanceLimit = other.rtDistanceLimit;
         rtDebug = other.rtDebug;
         resolution = other.resolution;
         renderDistance = other.renderDistance;

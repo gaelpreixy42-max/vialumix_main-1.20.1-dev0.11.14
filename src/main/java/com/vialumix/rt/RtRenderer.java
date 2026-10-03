@@ -38,27 +38,14 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class RtRenderer {
     private static final Logger LOGGER = LoggerFactory.getLogger("vialumix-rt");
-    private static final String[] TEXTURE_NAMES = {"rt_a", "rt_b", "rt_c", "rt_d", "rt_e"};
-    private static final float MAX_DISTANCE = 112.0f;
-
-    private static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
-        Thread t = new Thread(r, "Vialumix RT scene builder");
-        t.setDaemon(true);
-        return t;
-    });
-    private static final RtSceneBuilder BUILDER = new RtSceneBuilder();
-    private static final AtomicReference<RtSceneBuilder.Snapshot> PENDING = new AtomicReference<>();
+    private static final String[] TEXTURE_NAMES = {"rt_a", "rt_b", "rt_c", "rt_d", "rt_e", "rt_f"};
 
     private static boolean texturesRegistered;
     private static boolean nativeReady;
     private static boolean failed;
-    private static boolean sceneUploaded;
-    private static RtSceneBuilder.Snapshot scene;
-    private static long uploadedHash;
-    private static boolean buildRunning;
-    private static int centerX, centerY, centerZ;
-    private static boolean hasCenter;
-    private static int ticksSinceBuild;
+    private static int originX, originY, originZ;   // TLAS origin for the current frame (16-aligned, near the camera)
+    private static int radiusChunks = 16;
+    private static float radiusBlocks = 256f;
 
     private static boolean glSignaled;
     private static boolean tracedThisFrame;
@@ -82,6 +69,7 @@ public final class RtRenderer {
         });
         WorldRenderEvents.START.register(RtRenderer::frameStart);
         WorldRenderEvents.AFTER_ENTITIES.register(context -> afterEntities());
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(RtRenderer::composite);
         WorldRenderEvents.END.register(context -> frameEnd(context));
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> shutdown());
     }
@@ -99,87 +87,127 @@ public final class RtRenderer {
         VialumixConfig config = VialumixClient.config();
         return config != null && config.rayTracing && "vulkan".equalsIgnoreCase(config.backend)
                 && !failed && VialumixNative.isLoaded() && !VialumixNative.isRadianceBackendAvailable()
-                && VialumixNative.supportsRayTracing() && BlissRtPatcher.isRtPackActive();
+                && VialumixNative.supportsRayTracing() && mode() != Mode.NONE;
+    }
+
+    public enum Mode { NONE, BLISS, NATIVE }
+
+    private static java.lang.reflect.Method shaderPackInUse;
+    private static Object irisApi;
+
+    private static boolean irisShadersInUse() {
+        try {
+            if (shaderPackInUse == null) {
+                Class<?> api = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+                irisApi = api.getMethod("getInstance").invoke(null);
+                shaderPackInUse = api.getMethod("isShaderPackInUse");
+            }
+            return Boolean.TRUE.equals(shaderPackInUse.invoke(irisApi));
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    /** BLISS: Iris runs the generated Bliss RT variant. NATIVE: no shaderpack, RT draws the lit world itself. */
+    public static Mode mode() {
+        if (BlissRtPatcher.isRtPackActive()) return Mode.BLISS;
+        return irisShadersInUse() ? Mode.NONE : Mode.NATIVE;
     }
 
     private static boolean atlasDirty = true;
     private static int atlasDelay;
     private static boolean packChecked;
+    private static int packAttempts;
+    private static int packCooldown;
 
-    /** Applies the generated RT variant of Bliss once when the saved config asks for ray tracing. */
+    /** Applies the right shaderpack state once the saved config asks for ray tracing (retries while Iris starts). */
     private static void ensureRtPack() {
         VialumixConfig config = VialumixClient.config();
         if (packChecked || config == null || !config.rayTracing || !"vulkan".equalsIgnoreCase(config.backend)
                 || VialumixNative.isRadianceBackendAvailable() || !VialumixNative.supportsRayTracing()) return;
-        packChecked = true;
-        if (BlissRtPatcher.isRtPackActive()) return;
+        boolean wantNative = config.shaderpack == null || config.shaderpack.isBlank();
+        if (!wantNative && BlissRtPatcher.isRtPackActive()) { packChecked = true; return; }
+        if (packCooldown-- > 0) return;
+        packCooldown = 40;
         var manager = VialumixClient.shaderpacks();
-        String source = manager.sourceOf(config.shaderpack == null || config.shaderpack.isBlank() ? manager.currentSelection() : config.shaderpack);
+        if (wantNative) {
+            // No shaderpack chosen: native ray-traced lighting. Make sure Iris is not running any pack.
+            if (irisShadersInUse() && !manager.apply("")) return;
+            LOGGER.info("Vialumix native ray tracing selected (no shaderpack).");
+            packChecked = true;
+            return;
+        }
+        String source = manager.sourceOf(config.shaderpack);
         if (!BlissRtPatcher.isBliss(source)) {
             LOGGER.warn("Vialumix RT is enabled but the selected shaderpack '{}' is not Bliss; ray tracing stays idle.", source);
+            packChecked = true;
             return;
         }
         String variant = BlissRtPatcher.ensureVariant(manager.directory(), source);
         if (variant == null || !manager.apply(variant)) {
-            LOGGER.error("Vialumix could not apply the Bliss RT shaderpack variant.");
+            if (++packAttempts >= 6) {
+                packChecked = true;
+                LOGGER.error("Vialumix could not apply the Bliss RT shaderpack variant after {} attempts.", packAttempts);
+            }
             return;
         }
+        packChecked = true;
         LOGGER.info("Vialumix applied shaderpack '{}' for ray tracing.", variant);
+    }
+
+    private static boolean bobbingRestore;
+
+    /**
+     * Vanilla applies view bobbing inside the projection matrix, so the raster world sways while the ray-traced image does
+     * not; the depth test between them then hides the RT image in motion. Bobbing is therefore switched off while RT is
+     * active and the player's setting is restored afterwards.
+     */
+    private static void manageBobbing(MinecraftClient client, boolean rtActive) {
+        var option = client.options.getBobView();
+        if (rtActive) {
+            if (option.getValue()) { option.setValue(false); bobbingRestore = true; }
+        } else if (bobbingRestore) {
+            option.setValue(true);
+            bobbingRestore = false;
+        }
     }
 
     private static void tick(MinecraftClient client) {
         ensureRtPack();
-        if (!active() || client.world == null || client.player == null) {
-            hasCenter = false;
-            return;
-        }
-        if (buildRunning) return;
-        Vec3d cam = client.gameRenderer.getCamera().getPos();
-        int cx = (int) Math.floor(cam.x), cy = (int) Math.floor(cam.y), cz = (int) Math.floor(cam.z);
-        boolean recenter = !hasCenter || Math.abs(cx - centerX) > 16 || Math.abs(cz - centerZ) > 16 || Math.abs(cy - centerY) > 12;
-        if (!recenter && ++ticksSinceBuild < 10) return;
-        if (recenter) {
-            centerX = Math.floorDiv(cx, 16) * 16 + 8;
-            centerY = Math.floorDiv(cy, 8) * 8 + 4;
-            centerZ = Math.floorDiv(cz, 16) * 16 + 8;
-            hasCenter = true;
-        }
-        ticksSinceBuild = 0;
-        buildRunning = true;
-        ClientWorld world = client.world;
-        int ox = centerX, oy = centerY, oz = centerZ;
-        WORKER.execute(() -> {
-            try {
-                PENDING.set(BUILDER.build(client, world, ox, oy, oz));
-            } catch (Throwable error) {
-                LOGGER.warn("Vialumix RT scene capture failed", error);
-            } finally {
-                buildRunning = false;
-            }
-        });
+        manageBobbing(client, active() && client.world != null);
+        if (!active() || client.world == null || client.player == null) return;
+        VialumixConfig config = VialumixClient.config();
+        int vanilla = client.options.getViewDistance().getValue();
+        radiusChunks = Math.max(2, Math.min(32, config.rtDistanceLimit > 0 ? Math.min(config.rtDistanceLimit, vanilla) : vanilla));
+        radiusBlocks = radiusChunks * 16f;
+        RtSections.tick(client, radiusChunks);
     }
+
+    private static long framesSeen, framesTraced;
 
     private static void frameStart(WorldRenderContext context) {
         MinecraftClient client = MinecraftClient.getInstance();
+        framesSeen++;
         // A previous frame that never reached frameEnd must still pair its wait/signal.
         if (tracedThisFrame) { finishFrame(); }
         boolean active = active() && client.world != null && client.player != null;
         if (!active) {
-            if (wasActive) LOGGER.info("Vialumix RT bridge idle (RT disabled or Bliss RT pack not active).");
+            if (wasActive) LOGGER.info("Vialumix RT bridge idle (RT disabled or an unsupported shaderpack is active).");
             wasActive = false;
             return;
         }
+        if (!wasActive) LOGGER.info("Vialumix RT mode: {}", mode());
         wasActive = true;
         try {
             if (!ensureNative(client)) return;
             ensureTargets(client);
             uploadAtlasIfNeeded(client);
-            uploadPendingScene();
-            if (!sceneUploaded) return;
+            if (RtSections.upload(96) == 0) return;
             float[] frame = frameParameters(client, context);
             if (frame == null) return;
-            if (VialumixNative.rtTrace(frame, glSignaled)) {
+            if (VialumixNative.rtTrace(frame, glSignaled, originX, originY, originZ)) {
                 glSignaled = false;
+                framesTraced++;
                 tracedThisFrame = true;
                 waitedThisFrame = false;
             }
@@ -197,6 +225,22 @@ public final class RtRenderer {
         } catch (Throwable error) {
             failed = true;
             LOGGER.error("Vialumix RT GL wait failed", error);
+        }
+    }
+
+    private static final float[] lastForward = new float[3];
+    private static float lastTanX = 1f, lastTanY = 1f, lastP22 = -1f, lastP32 = -0.1f;
+    private static boolean nativeFrame;
+
+    /** Native mode: draws the RT image over the vanilla world (after translucents, before the hand and HUD). */
+    private static void composite(WorldRenderContext context) {
+        if (!tracedThisFrame || !nativeFrame || failed) return;
+        if (!waitedThisFrame) afterEntities();
+        try {
+            RtComposite.draw(RtGlBridge.textureId(5), lastTanX, lastTanY, lastP22, lastP32, radiusBlocks * 0.86f, radiusBlocks * 0.98f, 1.0f);
+        } catch (Throwable error) {
+            failed = true;
+            LOGGER.error("Vialumix RT composite failed", error);
         }
     }
 
@@ -229,7 +273,7 @@ public final class RtRenderer {
             failed = true;
             return false;
         }
-        VialumixNative.rtInit(report.deviceLuid(), shader("rt.rgen"), shader("rt.rmiss"), shader("rt_shadow.rmiss"), shader("rt.rchit"), shader("rt.rahit"));
+        VialumixNative.rtInit(report.deviceLuid(), shader("rt.rgen"), shader("rt.rmiss"), shader("rt_shadow.rmiss"), shader("rt.rchit"), shader("rt.rahit"), shader("rt_post.comp"));
         nativeReady = true;
         LOGGER.info("Vialumix RT bridge: Vulkan device created and ray-tracing pipeline compiled.");
         return true;
@@ -244,7 +288,7 @@ public final class RtRenderer {
         if (tracedThisFrame) finishFrame();
         RtGlBridge.configure(w, h);
         glSignaled = false;
-        LOGGER.info("Vialumix RT bridge: shared RT images configured at {}x{} (RGBA16F x3).", w, h);
+        LOGGER.info("Vialumix RT bridge: shared RT images configured at {}x{} (RGBA16F x6).", w, h);
     }
 
     /** Copies level 0 of the block atlas to Vulkan (once, and again after every resource reload). */
@@ -263,26 +307,12 @@ public final class RtRenderer {
             GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixels);
             VialumixNative.rtSetAtlas(pixels, w, h);
             atlasDirty = false;
-            uploadedHash = 0;
+            RtSections.rebuildAll();
             LOGGER.info("Vialumix RT bridge: block atlas {}x{} uploaded to Vulkan.", w, h);
         } finally {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, previous);
             if (pixels != null) MemoryUtil.memFree(pixels);
         }
-    }
-
-    private static void uploadPendingScene() {
-        RtSceneBuilder.Snapshot next = PENDING.getAndSet(null);
-        if (next == null) return;
-        if (sceneUploaded && next.hash() == uploadedHash) return;
-        long start = System.nanoTime();
-        VialumixNative.rtSetScene(next.solidVertices(), next.solidData(), next.waterVertices(), next.waterColors());
-        scene = next;
-        uploadedHash = next.hash();
-        sceneUploaded = true;
-        LOGGER.info("Vialumix RT scene uploaded: {} solid + {} water triangles around ({}, {}, {}) in {} ms.",
-                next.solidTriangles(), next.waterTriangles(), next.originX(), next.originY(), next.originZ(),
-                (System.nanoTime() - start) / 1_000_000L);
     }
 
     private static float[] frameParameters(MinecraftClient client, WorldRenderContext context) {
@@ -292,39 +322,53 @@ public final class RtRenderer {
         float tanX = 1.0f / projection.m00();
         if (!Float.isFinite(tanX) || !Float.isFinite(tanY)) return null;
         Vec3d pos = camera.getPos();
-        Vector3f forward = new Vector3f(camera.getHorizontalPlane());
-        Vector3f up = new Vector3f(camera.getVerticalPlane());
-        Vector3f right = new Vector3f(camera.getDiagonalPlane()).negate();
+        originX = Math.floorDiv((int) Math.floor(pos.x), 16) * 16;
+        originY = Math.floorDiv((int) Math.floor(pos.y), 16) * 16;
+        originZ = Math.floorDiv((int) Math.floor(pos.z), 16) * 16;
+        // Use the actual view matrix handed to the world renderer: it already contains view bobbing, hurt tilt and nausea.
+        org.joml.Matrix4f view = new org.joml.Matrix4f(context.matrixStack().peek().getPositionMatrix());
+        org.joml.Matrix3f rot = new org.joml.Matrix3f(view);
+        Vector3f right = new Vector3f(rot.m00(), rot.m10(), rot.m20());   // world direction of view-space +X
+        Vector3f up = new Vector3f(rot.m01(), rot.m11(), rot.m21());
+        Vector3f forward = new Vector3f(-rot.m02(), -rot.m12(), -rot.m22()); // view space looks down -Z
+        Vector3f viewShift = new Vector3f(view.m30(), view.m31(), view.m32());
+        // view = R * (p - cam) + t  =>  effective camera position = cam - R^T * t
+        Vector3f shift = new Vector3f(rot.transpose(new org.joml.Matrix3f()).transform(viewShift));
+        pos = new Vec3d(pos.x - shift.x, pos.y - shift.y, pos.z - shift.z);
         float tickDelta = context.tickDelta();
         ClientWorld world = client.world;
         Vector3f sun = sunDirection(world.getSkyAngle(tickDelta), BlissRtPatcher.sunPathRotation());
+        Vector3f sunRaw = new Vector3f(sun);
         boolean night = sun.y < 0.0f;
         if (night) sun.negate();
         VialumixConfig config = VialumixClient.config();
-        float[] f = new float[44];
-        f[0] = (float) (pos.x - scene.originX());
-        f[1] = (float) (pos.y - scene.originY());
-        f[2] = (float) (pos.z - scene.originZ());
+        float[] f = new float[56];
+        lastForward[0] = forward.x; lastForward[1] = forward.y; lastForward[2] = forward.z;
+        lastTanX = tanX; lastTanY = tanY; lastP22 = projection.m22(); lastP32 = projection.m32();
+        nativeFrame = mode() == Mode.NATIVE;
+        f[0] = (float) (pos.x - originX);
+        f[1] = (float) (pos.y - originY);
+        f[2] = (float) (pos.z - originZ);
         f[3] = (float) ((world.getTime() + tickDelta) / 20.0);
-        f[4] = right.x * tanX; f[5] = right.y * tanX; f[6] = right.z * tanX; f[7] = scene.originX();
-        f[8] = up.x * tanY; f[9] = up.y * tanY; f[10] = up.z * tanY; f[11] = scene.originY();
-        f[12] = forward.x; f[13] = forward.y; f[14] = forward.z; f[15] = scene.originZ();
+        f[4] = right.x * tanX; f[5] = right.y * tanX; f[6] = right.z * tanX; f[7] = originX;
+        f[8] = up.x * tanY; f[9] = up.y * tanY; f[10] = up.z * tanY; f[11] = originY;
+        f[12] = forward.x; f[13] = forward.y; f[14] = forward.z; f[15] = originZ;
         f[16] = sun.x; f[17] = sun.y; f[18] = sun.z; f[19] = night ? 0.03f : 0.018f;
         f[20] = config.rayTracedReflections ? 1.0f : 0.0f;
         f[21] = config.rayTracedShadows ? 1.0f : 0.0f;
-        f[22] = MAX_DISTANCE;
+        f[22] = radiusBlocks * 1.08f + 24.0f;
         f[23] = frameIndex++ & 0xFFFF;
         f[24] = client.player != null && client.player.isSubmergedInWater() ? 1.0f : 0.0f;
         f[25] = 1.0f;
         boolean gi = config.rayTracedGI, ao = config.rayTracedAO;
-        f[26] = (gi || ao) ? 1.0f : 0.0f;
+        f[26] = (gi || ao || nativeFrame) ? 1.0f : 0.0f;
         f[27] = (ao ? 1 : 0) + (gi ? 2 : 0);
         // Previous camera, re-expressed relative to the current scene origin.
         float[] cur = {(float) pos.x, (float) pos.y, (float) pos.z, 0f,
                 right.x * tanX, right.y * tanX, right.z * tanX, 0f,
                 up.x * tanY, up.y * tanY, up.z * tanY, 0f};
         float[] prev = hasPrevCamera ? PREV_CAMERA : cur;
-        f[28] = prev[0] - scene.originX(); f[29] = prev[1] - scene.originY(); f[30] = prev[2] - scene.originZ();
+        f[28] = prev[0] - originX; f[29] = prev[1] - originY; f[30] = prev[2] - originZ;
         f[32] = prev[4]; f[33] = prev[5]; f[34] = prev[6];
         f[36] = prev[8]; f[37] = prev[9]; f[38] = prev[10];
         float[] prevForward = hasPrevCamera ? PREV_FORWARD : new float[]{forward.x, forward.y, forward.z};
@@ -332,7 +376,36 @@ public final class RtRenderer {
         System.arraycopy(cur, 0, PREV_CAMERA, 0, 12);
         PREV_FORWARD[0] = forward.x; PREV_FORWARD[1] = forward.y; PREV_FORWARD[2] = forward.z;
         hasPrevCamera = true;
+        // Native lighting (only used when no shaderpack renders the world).
+        float elevation = sunRaw.y;
+        float day = smooth(-0.12f, 0.20f, elevation);
+        float low = 1.0f - smooth(0.05f, 0.45f, elevation);
+        float rain = world.getRainGradient(tickDelta) * 0.7f;
+        float sunPower = 3.2f * day * (1.0f - 0.8f * rain);
+        float[] sunRgb = {1.0f, 0.93f - 0.38f * low, 0.82f - 0.57f * low};
+        float moon = (1.0f - day) * 0.22f;
+        // Sky radiance from vanilla's own sky colour (follows time of day, weather and biome), made linear.
+        Vec3d vanillaSky = world.getSkyColor(pos, tickDelta);
+        float[] zenith = {lin(vanillaSky.x) * 0.55f, lin(vanillaSky.y) * 0.55f, lin(vanillaSky.z) * 0.55f};
+        float[] horizon = {
+                (zenith[0] * 0.55f + 0.55f * day) * (1.0f + 0.35f * low), (zenith[1] * 0.55f + 0.62f * day) * (1.0f - 0.10f * low),
+                (zenith[2] * 0.55f + 0.70f * day) * (1.0f - 0.35f * low)};
+        for (int i = 0; i < 3; i++) { horizon[i] = horizon[i] * 0.80f + 0.03f * (1.0f - day); }
+        f[44] = zenith[0]; f[45] = zenith[1]; f[46] = zenith[2];
+        f[52] = horizon[0]; f[53] = horizon[1]; f[54] = horizon[2]; f[55] = 1.0f;
+        f[47] = nativeFrame ? 1.0f : 0.0f;
+        f[48] = sunRgb[0] * sunPower + 0.55f * moon;
+        f[49] = sunRgb[1] * sunPower + 0.65f * moon;
+        f[50] = sunRgb[2] * sunPower + 1.00f * moon;
+        f[51] = 7.0f; // emissive scale
         return f;
+    }
+
+    private static float lin(double c) { return (float) Math.pow(Math.max(c, 0.0), 2.2); }
+
+    private static float smooth(float a, float b, float x) {
+        float t = Math.max(0f, Math.min(1f, (x - a) / (b - a)));
+        return t * t * (3f - 2f * t);
     }
 
     /** Same celestial transform Iris applies: rotate Y(-90), Z(sunPathRotation), X(skyAngle * 360). */
@@ -361,8 +434,13 @@ public final class RtRenderer {
             if (client.crosshairTarget != null && client.crosshairTarget.getType() != net.minecraft.util.hit.HitResult.Type.MISS) {
                 crosshair = client.crosshairTarget.getPos().distanceTo(context.camera().getPos());
             }
-            LOGGER.info("RT gpu={} ms | RT center texel: shadow={} solidDist={} waterDist={} flags={} | crosshairDist={} | reflAlbedo=({}, {}, {}) hit={} | lit={} emissive={} sky={}",
-                    String.format("%.2f", VialumixNative.rtLastMs()), a[0], a[1], a[2], a[3], crosshair, b[0], b[1], b[2], b[3], c[0], c[1], c[3]);
+            Vec3d dbgPos = context.camera().getPos();
+            LOGGER.info("RT cam=({}, {}, {}) yaw={} origin=({}, {}, {}) basisFwd=({}, {}, {}) player=({}, {}, {})",
+                    String.format("%.1f", dbgPos.x), String.format("%.1f", dbgPos.y), String.format("%.1f", dbgPos.z), String.format("%.1f", context.camera().getYaw()),
+                    originX, originY, originZ, lastForward[0], lastForward[1], lastForward[2],
+                    String.format("%.1f", client.player.getX()), String.format("%.1f", client.player.getY()), String.format("%.1f", client.player.getZ()));
+            LOGGER.info("RT frames traced {}/{} | RT gpu={} ms, {} sections | RT center texel: shadow={} solidDist={} waterDist={} flags={} | crosshairDist={} | reflAlbedo=({}, {}, {}) hit={} | lit={} emissive={} sky={}",
+                    framesTraced, framesSeen, String.format("%.2f", VialumixNative.rtLastMs()), VialumixNative.rtSectionCount(), a[0], a[1], a[2], a[3], crosshair, b[0], b[1], b[2], b[3], c[0], c[1], c[3]);
         } catch (Throwable error) {
             LOGGER.warn("RT debug read failed: {}", error.toString());
             config.rtDebug = false;
@@ -379,10 +457,11 @@ public final class RtRenderer {
     public static void shutdown() {
         try {
             if (tracedThisFrame) finishFrame();
+            RtSections.reset();
+            if (bobbingRestore) { MinecraftClient.getInstance().options.getBobView().setValue(true); bobbingRestore = false; }
             RtGlBridge.release();
             if (nativeReady) VialumixNative.rtShutdown();
         } catch (Throwable ignored) { }
         nativeReady = false;
-        sceneUploaded = false;
     }
 }

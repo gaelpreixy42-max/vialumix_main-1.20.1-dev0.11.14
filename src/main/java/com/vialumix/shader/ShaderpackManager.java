@@ -116,12 +116,16 @@ public final class ShaderpackManager {
             }
 
             Method validate = iris.getMethod("isValidShaderpack", Path.class);
-            if (!Boolean.TRUE.equals(validate.invoke(null, directory.resolve(file)))) return false;
+            if (!Boolean.TRUE.equals(validate.invoke(null, directory.resolve(file)))) {
+                org.slf4j.LoggerFactory.getLogger("vialumix-shaderpack").warn("Iris does not consider '{}' a valid shaderpack.", directory.resolve(file));
+                return false;
+            }
             config.getClass().getMethod("setShaderPackName", String.class).invoke(config, file);
             config.getClass().getMethod("save").invoke(config);
             applyIrisToggle(true);
             return true;
-        } catch (Throwable ignored) {
+        } catch (Throwable error) {
+            org.slf4j.LoggerFactory.getLogger("vialumix-shaderpack").warn("Could not apply shaderpack '{}': {}", file, String.valueOf(error));
             return false;
         }
     }

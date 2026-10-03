@@ -98,7 +98,6 @@ public final class ShaderpackSelectionScreen extends Screen {
     private final class PackList extends ElementListWidget<PackEntry> {
         private PackList(MinecraftClient client, int width, int height, int top, int bottom, int itemHeight) {
             super(client, width, height, top, bottom, itemHeight);
-            setLeftPos((width - Math.min(420, width - 40)) / 2);
         }
 
         @Override

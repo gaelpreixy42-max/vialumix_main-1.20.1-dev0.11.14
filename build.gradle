@@ -32,6 +32,13 @@ dependencies {
         'instance/mods/sodium-0.5.13+mc1.20.1.jar',
         'instance/mods/iris-1.7.6+mc1.20.1.jar'
     )
+    // Iris bundles these (jar-in-jar); the dev runtime needs them on the classpath explicitly.
+    runtimeOnly fileTree(dir: "libs/devruntime", include: ["*.jar"])
+    // Dev-only runtime so runClient exercises the real Sodium + Iris pipeline (used by the automated render test).
+    modLocalRuntime files(
+        'instance/mods/sodium-0.5.13+mc1.20.1.jar',
+        'instance/mods/iris-1.7.6+mc1.20.1.jar'
+    )
     // Optional compile-time API for Mod Menu 7.2.2 on Minecraft 1.20.1.
     // It is not a runtime dependency of Vialumix.
     modCompileOnly 'maven.modrinth:mOgUt4GM:lEkperf6'

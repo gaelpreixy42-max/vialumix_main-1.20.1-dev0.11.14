@@ -122,10 +122,10 @@ JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeDestroyRayTraci
 /*
  * Class:     com_vialumix_rt_VialumixNative
  * Method:    nativeRtInit
- * Signature: ([B[B[B[B[B[B)Z
+ * Signature: ([B[B[B[B[B[B[B)Z
  */
 JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtInit
-  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
 
 /*
  * Class:     com_vialumix_rt_VialumixNative
@@ -137,11 +137,35 @@ JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtSetAtlas
 
 /*
  * Class:     com_vialumix_rt_VialumixNative
- * Method:    nativeRtSetScene
- * Signature: ([F[F[F[F)Z
+ * Method:    nativeRtSectionUploadBatch
+ * Signature: ([I[I[I[[F[[F)Z
  */
-JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtSetScene
-  (JNIEnv *, jclass, jfloatArray, jfloatArray, jfloatArray, jfloatArray);
+JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtSectionUploadBatch
+  (JNIEnv *, jclass, jintArray, jintArray, jintArray, jobjectArray, jobjectArray);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtSectionRemove
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtSectionRemove
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtClearSections
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtClearSections
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtSectionCount
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtSectionCount
+  (JNIEnv *, jclass);
 
 /*
  * Class:     com_vialumix_rt_VialumixNative
@@ -154,10 +178,10 @@ JNIEXPORT jlongArray JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtConfigu
 /*
  * Class:     com_vialumix_rt_VialumixNative
  * Method:    nativeRtTrace
- * Signature: ([FZ)Z
+ * Signature: ([FZIII)Z
  */
 JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtTrace
-  (JNIEnv *, jclass, jfloatArray, jboolean);
+  (JNIEnv *, jclass, jfloatArray, jboolean, jint, jint, jint);
 
 /*
  * Class:     com_vialumix_rt_VialumixNative

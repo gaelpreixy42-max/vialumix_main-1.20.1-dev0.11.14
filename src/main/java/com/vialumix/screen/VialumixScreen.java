@@ -133,7 +133,10 @@ public final class VialumixScreen extends Screen {
         if (!radiance && cfg.rayTracing && "vulkan".equalsIgnoreCase(cfg.backend)) {
             // Ray tracing runs on top of Bliss: Iris is pointed at a locally generated "(Vialumix RT)" copy.
             String source = VialumixClient.shaderpacks().sourceOf(cfg.shaderpack);
-            if (!com.vialumix.shader.BlissRtPatcher.isBliss(source)) {
+            if (source == null || source.isBlank()) {
+                // No shaderpack: native ray-traced lighting over vanilla/Sodium rendering.
+                packToApply = "";
+            } else if (!com.vialumix.shader.BlissRtPatcher.isBliss(source)) {
                 cfg.rayTracing = false;
                 cfg.backend = "iris";
                 VialumixClient.notify("vialumix.rt.bliss_required");

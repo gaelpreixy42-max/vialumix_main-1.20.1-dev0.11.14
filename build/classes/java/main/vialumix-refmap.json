@@ -1,5 +1,8 @@
 {
   "mappings": {
+    "com/vialumix/mixin/ClientWorldMixin": {
+      "handleBlockUpdate": "Lnet/minecraft/class_638;method_41928(Lnet/minecraft/class_2338;Lnet/minecraft/class_2680;I)V"
+    },
     "com/vialumix/mixin/GameOptionsScreenAccessor": {
       "parent": "field_21335:Lnet/minecraft/class_437;"
     },
@@ -12,6 +15,9 @@
   },
   "data": {
     "named:intermediary": {
+      "com/vialumix/mixin/ClientWorldMixin": {
+        "handleBlockUpdate": "Lnet/minecraft/class_638;method_41928(Lnet/minecraft/class_2338;Lnet/minecraft/class_2680;I)V"
+      },
       "com/vialumix/mixin/GameOptionsScreenAccessor": {
         "parent": "field_21335:Lnet/minecraft/class_437;"
       },

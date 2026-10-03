@@ -17,7 +17,7 @@ import java.nio.FloatBuffer;
  * to their own screen-space paths.
  */
 public final class RtGlBridge {
-    public static final int IMAGE_COUNT = 5;
+    public static final int IMAGE_COUNT = 6;
 
     private static final int[] textures = new int[IMAGE_COUNT];
     private static final int[] memoryObjects = new int[IMAGE_COUNT];

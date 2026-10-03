@@ -34,6 +34,14 @@ public final class VialumixClient implements ClientModInitializer {
             config.rayTracing = true;
             config.backend = "vulkan";
         }
+        String autoTest = AutoTest.mode();
+        if (autoTest != null) {
+            // Developer render test: force the requested rendering mode regardless of the saved config.
+            config.rayTracing = !autoTest.equals("vanilla");
+            config.backend = config.rayTracing ? "vulkan" : "iris";
+            config.shaderpack = autoTest.equals("bliss") ? "Bliss_v2.1.2_(Chocapic13_Shaders_edit).zip" : "";
+            config.rtDebug = true;
+        }
         shaderpacks = new ShaderpackManager(root.resolve("shaderpacks"));
         shaderpacks.scan();
         VialumixNative.initialize(root.resolve("vialumix"));
@@ -75,6 +83,7 @@ public final class VialumixClient implements ClientModInitializer {
         });
 
         RtRenderer.register();
+        AutoTest.register();
 
         if (VialumixNative.isRadianceBackendAvailable()) {
             // Radiance owns the Vulkan renderer in this artifact. Select its built-in RT pack
