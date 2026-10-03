@@ -119,6 +119,46 @@ JNIEXPORT jlongArray JNICALL Java_com_vialumix_rt_VialumixNative_nativeRunRayTra
 JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeDestroyRayTracingInterop
   (JNIEnv *, jclass);
 
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtInit
+ * Signature: ([B[B[B[B[B)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtInit
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtSetScene
+ * Signature: ([F[F[F[F)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtSetScene
+  (JNIEnv *, jclass, jfloatArray, jfloatArray, jfloatArray, jfloatArray);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtConfigure
+ * Signature: (II)[J
+ */
+JNIEXPORT jlongArray JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtConfigure
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtTrace
+ * Signature: ([FZ)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtTrace
+  (JNIEnv *, jclass, jfloatArray, jboolean);
+
+/*
+ * Class:     com_vialumix_rt_VialumixNative
+ * Method:    nativeRtShutdown
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_vialumix_rt_VialumixNative_nativeRtShutdown
+  (JNIEnv *, jclass);
+
 #ifdef __cplusplus
 }
 #endif

@@ -11,6 +11,8 @@ public final class VialumixNative {
     private static Path runtimeDirectory;
     private static DlssRuntime dlssRuntime;
     private static String loadError = "";
+    private static volatile boolean hardwareRayTracingAvailable;
+    private static volatile boolean rendererRequested;
 
     private VialumixNative() {}
 
@@ -70,6 +72,16 @@ public final class VialumixNative {
         }
     }
 
+    public static void setHardwareRayTracingAvailable(String probeReport) {
+        hardwareRayTracingAvailable = probeReport != null
+                && probeReport.contains("rayTracingFeatures=1")
+                && probeReport.contains("VK_KHR_external_memory_win32=1")
+                && probeReport.contains("VK_KHR_external_semaphore_win32=1")
+                && probeReport.contains("rgba8ExternalImageExport=1")
+                && probeReport.contains("opaqueWin32SemaphoreImportExport=1");
+        if (!hardwareRayTracingAvailable) rendererRequested = false;
+    }
+
     public static long[] createVulkanInteropImage(byte[] openGlDeviceLuid) {
         if (!loaded) throw new IllegalStateException("Vialumix native Vulkan probe unavailable: " + loadError);
         return nativeCreateInteropImage(openGlDeviceLuid);
@@ -101,20 +113,22 @@ public final class VialumixNative {
         }
     }
 
-    public static boolean supportsRayTracing() { return isRadianceBackendAvailable(); }
+    public static boolean supportsRayTracing() { return isRadianceBackendAvailable() || (loaded && hardwareRayTracingAvailable); }
 
     public static synchronized boolean startRenderer() {
         if (isRadianceBackendAvailable()) return isRadianceRendererReady();
-        return false;
+        rendererRequested = loaded && hardwareRayTracingAvailable;
+        return rendererRequested;
     }
 
     public static synchronized void stopRenderer() {
         if (isRadianceBackendAvailable()) return; // MCVR hooks are installed at game startup.
+        rendererRequested = false;
         if (loaded) nativeStopRenderer();
     }
 
     public static boolean isRendererReady() {
-        return isRadianceRendererReady();
+        return isRadianceRendererReady() || (rendererRequested && hardwareRayTracingAvailable);
     }
     public static boolean supportsDLSS() { return !isRadianceBackendAvailable() && loaded && dlssRuntime != null && dlssRuntime.hasSuperResolution() && nativeSupportsDLSS(); }
     public static boolean supportsRayReconstruction() { return !isRadianceBackendAvailable() && loaded && dlssRuntime != null && dlssRuntime.hasRayReconstruction() && nativeSupportsRayReconstruction(); }
@@ -138,4 +152,22 @@ public final class VialumixNative {
     private static native void nativeDestroyInteropImage();
     private static native long[] nativeRunRayTracingInterop(byte[] openGlDeviceLuid, byte[] raygen, byte[] miss, byte[] closestHit, float[] vertices);
     private static native void nativeDestroyRayTracingInterop();
+    // ---- Persistent Iris bridge renderer (vulkan_rt_renderer.cpp) ----
+    public static boolean rtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit) {
+        if (!loaded) throw new IllegalStateException("Vialumix native Vulkan backend unavailable: " + loadError);
+        return nativeRtInit(luid, raygen, miss, shadowMiss, closestHit);
+    }
+    public static boolean rtSetScene(float[] solidVerts, float[] solidColors, float[] waterVerts, float[] waterColors) {
+        return nativeRtSetScene(solidVerts, solidColors, waterVerts, waterColors);
+    }
+    /** Returns {width, height, vk->gl semaphore, gl->vk semaphore, (memoryHandle, size) x3}. */
+    public static long[] rtConfigure(int width, int height) { return nativeRtConfigure(width, height); }
+    public static boolean rtTrace(float[] frame, boolean glSignaled) { return nativeRtTrace(frame, glSignaled); }
+    public static void rtShutdown() { if (loaded) nativeRtShutdown(); }
+
+    private static native boolean nativeRtInit(byte[] luid, byte[] raygen, byte[] miss, byte[] shadowMiss, byte[] closestHit);
+    private static native boolean nativeRtSetScene(float[] solidVerts, float[] solidColors, float[] waterVerts, float[] waterColors);
+    private static native long[] nativeRtConfigure(int width, int height);
+    private static native boolean nativeRtTrace(float[] frame, boolean glSignaled);
+    private static native void nativeRtShutdown();
 }

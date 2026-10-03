@@ -12,6 +12,7 @@ add_library(vialumix SHARED
     src/vulkan_gl_interop_probe.cpp
     src/vulkan_gl_image_probe.cpp
     src/vulkan_rt_triangle_probe.cpp
+    src/vulkan_rt_renderer.cpp
 )
 target_include_directories(vialumix PRIVATE ${JNI_INCLUDE_DIRS})
 target_link_libraries(vialumix PRIVATE Vulkan::Vulkan)

@@ -62,41 +62,38 @@ public final class VialumixScreen extends Screen {
 
         CyclingButtonWidget<Boolean> rayTracingButton = addDrawableChild(CyclingButtonWidget.onOffBuilder()
                 .initially(cfg.rayTracing)
-                .build(left, y, panelWidth, 24, Text.translatable("vialumix.rt.bliss_screen_mode"), (button, value) -> {
+                .build(left, y, panelWidth, 24, Text.translatable("vialumix.rt.hardware"), (button, value) -> {
                     if (VialumixNative.isRadianceBackendAvailable()) {
                         button.setValue(true);
                         VialumixClient.notify("vialumix.rt.mcvr_always_active");
                         return;
                     }
-                    if (value) {
-                        if (!VialumixNative.supportsRayTracing()
-                                && !VialumixClient.shaderpacks().supportsVialumixTracing(cfg.shaderpack)) {
-                            button.setValue(false);
-                            VialumixClient.notify("vialumix.rt.bliss_required");
-                            return;
-                        }
+                    if (value && !VialumixNative.supportsRayTracing()) {
+                        button.setValue(false);
+                        VialumixClient.notify("vialumix.rt.backend_missing");
+                        return;
                     }
                     cfg.rayTracing = value;
-                    cfg.backend = VialumixNative.supportsRayTracing() && value ? "vulkan" : "iris";
+                    cfg.backend = value ? "vulkan" : "iris";
                 }));
         if (VialumixNative.isRadianceBackendAvailable()) rayTracingButton.active = false;
         y += 31;
 
         int halfWidth = (panelWidth - 8) / 2;
-        addToggle(left, y, halfWidth, "vialumix.rt.shadows", () -> cfg.rayTracedShadows, v -> cfg.rayTracedShadows = v);
-        addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.reflections", () -> cfg.rayTracedReflections, v -> cfg.rayTracedReflections = v);
+        addToggle(left, y, halfWidth, "vialumix.rt.shadows", () -> cfg.rayTracedShadows, v -> cfg.rayTracedShadows = v, true);
+        addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.reflections", () -> cfg.rayTracedReflections, v -> cfg.rayTracedReflections = v, true);
         y += 31;
-        addToggle(left, y, halfWidth, "vialumix.rt.gi", () -> cfg.rayTracedGI, v -> cfg.rayTracedGI = v);
-        addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.ao", () -> cfg.rayTracedAO, v -> cfg.rayTracedAO = v);
+        addToggle(left, y, halfWidth, "vialumix.rt.gi", () -> cfg.rayTracedGI, v -> cfg.rayTracedGI = v, false);
+        addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.ao", () -> cfg.rayTracedAO, v -> cfg.rayTracedAO = v, false);
         y += 31;
-        addToggle(left, y, halfWidth, "vialumix.rt.denoiser", () -> cfg.denoiser, v -> cfg.denoiser = v);
+        addToggle(left, y, halfWidth, "vialumix.rt.denoiser", () -> cfg.denoiser, v -> cfg.denoiser = v, false);
         addToggle(left + halfWidth + 8, y, halfWidth, "vialumix.rt.reconstruction", () -> cfg.rayReconstruction, v -> {
             if (v && !VialumixNative.supportsRayReconstruction()) {
                 VialumixClient.notify("vialumix.dlss.rr_missing");
                 return;
             }
             cfg.rayReconstruction = v;
-        });
+        }, false);
         y += 31;
 
         dlssButton = addDrawableChild(ButtonWidget.builder(
@@ -132,19 +129,29 @@ public final class VialumixScreen extends Screen {
 
     private void applyAndClose() {
         boolean radiance = VialumixNative.isRadianceBackendAvailable();
-        if (!radiance && "iris".equalsIgnoreCase(cfg.backend)) {
-            boolean queued = VialumixClient.shaderpacks().applyVialumixOptions(cfg.shaderpack,
-                    cfg.rayTracing && cfg.rayTracedReflections, cfg.rayTracing && cfg.rayTracedGI,
-                    cfg.rayTracing && cfg.rayTracedShadows, cfg.rayTracing && cfg.rayTracedAO);
-            if (cfg.rayTracing && !queued) {
+        String packToApply = cfg.shaderpack;
+        if (!radiance && cfg.rayTracing && "vulkan".equalsIgnoreCase(cfg.backend)) {
+            // Ray tracing runs on top of Bliss: Iris is pointed at a locally generated "(Vialumix RT)" copy.
+            String source = VialumixClient.shaderpacks().sourceOf(cfg.shaderpack);
+            if (!com.vialumix.shader.BlissRtPatcher.isBliss(source)) {
                 cfg.rayTracing = false;
-                VialumixClient.config().copyFrom(cfg);
+                cfg.backend = "iris";
                 VialumixClient.notify("vialumix.rt.bliss_required");
+            } else {
+                String variant = com.vialumix.shader.BlissRtPatcher.ensureVariant(
+                        VialumixClient.shaderpacks().directory(), source);
+                if (variant == null) {
+                    cfg.rayTracing = false;
+                    cfg.backend = "iris";
+                    VialumixClient.notify("vialumix.rt.patch_failed");
+                } else {
+                    packToApply = variant;
+                }
             }
         }
         // Apply window/graphics settings before Iris rebuilds the rendering pipeline.
         applyBasicGraphics();
-        if (!VialumixClient.shaderpacks().apply(cfg.shaderpack)) {
+        if (!VialumixClient.shaderpacks().apply(packToApply)) {
             VialumixClient.notify("vialumix.shaderpack.apply_failed");
             return;
         }
@@ -172,7 +179,7 @@ public final class VialumixScreen extends Screen {
             VialumixNative.stopRenderer();
         }
 
-        if (cfg.rayTracing && !radiance) VialumixClient.notify("vialumix.rt.screen_space_notice");
+        if (cfg.rayTracing && !radiance) VialumixClient.notify("vialumix.rt.preview_notice");
 
         VialumixClient.save();
         client.setScreen(parent);
@@ -200,10 +207,10 @@ public final class VialumixScreen extends Screen {
         client.options.write();
     }
 
-    private void addToggle(int x, int y, int width, String label, BoolGetter getter, BoolSetter setter) {
+    private void addToggle(int x, int y, int width, String label, BoolGetter getter, BoolSetter setter, boolean implemented) {
         CyclingButtonWidget<Boolean> toggle = addDrawableChild(CyclingButtonWidget.onOffBuilder().initially(getter.get())
                 .build(x, y, width, 24, Text.translatable(label), (b, v) -> setter.set(v)));
-        if (VialumixNative.isRadianceBackendAvailable()) toggle.active = false;
+        if (VialumixNative.isRadianceBackendAvailable() || !implemented) toggle.active = false;
     }
 
     private void cycleResolution() {

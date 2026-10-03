@@ -3,6 +3,9 @@
     "com/vialumix/mixin/GameOptionsScreenAccessor": {
       "parent": "field_21335:Lnet/minecraft/class_437;"
     },
+    "com/vialumix/mixin/SpriteContentsAccessor": {
+      "image": "field_40539:Lnet/minecraft/class_1011;"
+    },
     "com/vialumix/mixin/VideoOptionsScreenMixin": {
       "init": "Lnet/minecraft/class_446;method_25426()V"
     }
@@ -11,6 +14,9 @@
     "named:intermediary": {
       "com/vialumix/mixin/GameOptionsScreenAccessor": {
         "parent": "field_21335:Lnet/minecraft/class_437;"
+      },
+      "com/vialumix/mixin/SpriteContentsAccessor": {
+        "image": "field_40539:Lnet/minecraft/class_1011;"
       },
       "com/vialumix/mixin/VideoOptionsScreenMixin": {
         "init": "Lnet/minecraft/class_446;method_25426()V"

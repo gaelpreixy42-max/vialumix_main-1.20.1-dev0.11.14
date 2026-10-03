@@ -6,7 +6,8 @@
   "client": [
     "VideoOptionsScreenMixin",
     "GameOptionsScreenAccessor",
-    "SodiumOptionsGUIMixin"
+    "SodiumOptionsGUIMixin",
+    "SpriteContentsAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

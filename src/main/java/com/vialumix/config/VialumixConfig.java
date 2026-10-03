@@ -22,6 +22,10 @@ public final class VialumixConfig {
     public String upscaler = "native";
     public String dlssQuality = "quality";
     public boolean frameGeneration = false;
+    /** Vialumix RT bridge: fraction of the framebuffer size used for the Vulkan RT images (0.25 - 1.0). */
+    public float rtResolutionScale = 1.0f;
+    /** Logs the centre RT texel against the crosshair distance every few seconds. */
+    public boolean rtDebug = false;
 
     /** Vialumix-owned basic video settings. */
     public String resolution = "current";
@@ -49,6 +53,8 @@ public final class VialumixConfig {
         upscaler = other.upscaler;
         dlssQuality = other.dlssQuality;
         frameGeneration = other.frameGeneration;
+        rtResolutionScale = other.rtResolutionScale;
+        rtDebug = other.rtDebug;
         resolution = other.resolution;
         renderDistance = other.renderDistance;
         graphicsQuality = other.graphicsQuality;

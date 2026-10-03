@@ -1,5 +1,6 @@
 package com.vialumix.rt;
 
+import com.vialumix.client.VialumixClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
@@ -35,7 +36,8 @@ public final class VialumixRayTracingDebugOverlay {
     }
 
     public static void render(DrawContext context, MinecraftClient client) {
-        if (pixels == null || client.world == null || client.player == null || client.world.getTime() > visibleUntil) return;
+        if (pixels == null || client.world == null || client.player == null || client.world.getTime() > visibleUntil
+                || VialumixClient.config() == null || !VialumixClient.config().rayTracing) return;
         int x = 10;
         int y = 10;
         int scale = 4;

@@ -13,6 +13,9 @@
     <ClCompile Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\src\vulkan_rt_triangle_probe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\src\vulkan_rt_renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\...Vialumix Dev\Vialumix 1.20.1\vialumix_main-1.20.1-dev0.11.14\native\CMakeLists.txt" />

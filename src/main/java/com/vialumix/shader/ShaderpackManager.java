@@ -48,12 +48,27 @@ public final class ShaderpackManager {
                         if (!present) packs.add(file);
                     });
         } catch (IOException ignoredAgain) { }
+        packs.removeIf(BlissRtPatcher::isVariantName);
         packs.sort(String.CASE_INSENSITIVE_ORDER);
     }
 
     private static boolean isShaderpackFile(Path p) {
         String n = p.getFileName().toString().toLowerCase(Locale.ROOT);
         return n.endsWith(".zip") || n.endsWith(".jar");
+    }
+
+    public Path directory() { return directory; }
+
+    /** Maps a generated "(Vialumix RT)" variant back to the pack file the user picked. */
+    public String sourceOf(String name) {
+        if (name == null || !BlissRtPatcher.isVariantName(name)) return name == null ? "" : name;
+        String base = name.substring(0, name.length() - BlissRtPatcher.SUFFIX.length());
+        for (String pack : packs) {
+            String stripped = pack.toLowerCase(Locale.ROOT).endsWith(".zip") || pack.toLowerCase(Locale.ROOT).endsWith(".jar")
+                    ? pack.substring(0, pack.length() - 4) : pack;
+            if (stripped.equals(base)) return pack;
+        }
+        return base + ".zip";
     }
 
     public List<String> packs() { return Collections.unmodifiableList(packs); }
@@ -75,7 +90,7 @@ public final class ShaderpackManager {
             Object selected = config.getClass().getMethod("getShaderPackName").invoke(config);
             if (selected instanceof java.util.Optional<?> optional) {
                 Object value = optional.orElse(null);
-                return value == null ? "" : value.toString();
+                return value == null ? "" : sourceOf(value.toString());
             }
         } catch (Throwable ignored) { }
         return "";
@@ -84,7 +99,7 @@ public final class ShaderpackManager {
     public boolean supportsVialumixTracing(String file) {
         if (isRadianceAvailable()) return true;
         String candidate = file == null || file.isBlank() ? currentSelection() : file;
-        return candidate.toLowerCase(Locale.ROOT).contains("bliss");
+        return BlissRtPatcher.isBliss(candidate);
     }
 
     /** Applies the selected pack through Iris itself; Vialumix does not reimplement GLSL loading. */
